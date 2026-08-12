@@ -10,8 +10,6 @@ const modules = import.meta.glob('../gallery/*.{jpg,jpeg,png,webp,avif}', {
 
 const { limit } = Astro.props;
 
-// Files named "sample-*" are placeholders used only by the home-page carousel,
-// so they're kept out of the gallery grid.
 let images = Object.entries(modules)
   .map(([path, mod]) => {
     const file = path.split('/').pop();
@@ -21,7 +19,6 @@ let images = Object.entries(modules)
       caption: captions[file] ?? null,
     };
   })
-  .filter((img) => !img.file.startsWith('sample-'))
   .sort((a, b) => a.file.localeCompare(b.file));
 
 if (limit) images = images.slice(0, limit);

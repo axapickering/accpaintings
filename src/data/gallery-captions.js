@@ -6,12 +6,8 @@
 //
 // The key is the image's file name (exactly as it appears in src/gallery/).
 // If an image isn't listed here, it just shows with no caption. That's fine.
+//
+// Example:
+//   'audrey.jpg': { title: 'Audrey', note: 'Acrylic on 8×8 canvas' },
 
-export const captions = {
-  'sample-01.jpg': { title: 'Bella', note: 'Acrylic on 8×8 canvas' },
-  'sample-02.jpg': { title: 'Milo', note: 'Acrylic on 8×10 canvas' },
-  'sample-03.jpg': { title: 'Luna & Max', note: 'Two pets · 8×10 canvas' },
-  'sample-04.jpg': { title: 'Poppy', note: 'Acrylic on 8×8 canvas' },
-  'sample-05.jpg': { title: 'Ziggy', note: 'Acrylic on 8×8 canvas' },
-  'sample-06.jpg': { title: 'Coco', note: 'Acrylic on 8×10 canvas' },
-};
+export const captions = {};

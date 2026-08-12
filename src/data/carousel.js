@@ -9,14 +9,37 @@
 // an entry here.
 
 export const carousel = [
-  { painting: 'sample-01.jpg', references: ['ref-01.jpg'], title: 'Bella' },
-  { painting: 'sample-02.jpg', references: ['ref-02.jpg'], title: 'Milo' },
+  { painting: 'audrey.jpg', references: ['audrey-ref.jpg'], title: 'Audrey' },
+  { painting: 'liam.jpg', references: ['liam-ref.jpg'], title: 'Liam' },
+  { painting: 'seamus.jpg', references: ['seamus-ref.jpg'], title: 'Seamus' },
   {
-    painting: 'sample-03.jpg',
-    references: ['ref-03a.jpg', 'ref-03b.jpg'],
-    title: 'Luna & Max',
+    painting: 'tallcat-squishcat.jpg',
+    references: ['tall-cat.jpg', 'squish-cat.jpg'],
+    title: 'Tall Cat & Squish Cat',
   },
-  { painting: 'sample-04.jpg', references: ['ref-04.jpg'], title: 'Poppy' },
-  { painting: 'sample-05.jpg', references: ['ref-05.jpg'], title: 'Ziggy' },
-  { painting: 'sample-06.jpg', references: ['ref-06.jpg'], title: 'Coco' },
+  {
+    painting: 'karate-cat.jpg',
+    references: ['karate-cat-ref.jpg'],
+    title: 'Karate Cat',
+  },
+  {
+    painting: 'black-cat.jpg',
+    references: ['black-cat-ref.jpg'],
+    title: 'Black Cat',
+  },
+  {
+    painting: 'fat-tuxedo-cat.jpg',
+    references: ['fat-tuxedo-cat-ref.jpg'],
+    title: 'Fat Tuxedo Cat',
+  },
+  {
+    painting: 'alisons-dogs.jpg',
+    references: ['alisons-dogs-ref.jpg'],
+    title: "Alison's Dogs",
+  },
+  {
+    painting: 'twodogs.jpg',
+    references: ['twodogs-ref.jpg'],
+    title: 'Two Dogs',
+  },
 ];
