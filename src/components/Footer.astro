@@ -1,0 +1,91 @@
+---
+const year = new Date().getFullYear();
+const links = [
+  { href: 'https://accpaintings.etsy.com', label: 'Etsy Shop' },
+  { href: 'https://www.instagram.com/accpaintings', label: 'Instagram' },
+  { href: 'https://www.facebook.com/ACCPaintings', label: 'Facebook' },
+  { href: 'mailto:accpaintings@gmail.com', label: 'Email' },
+];
+---
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <span class="footer-title">ACC Paintings</span>
+      <p>Custom pet portraits with cartoon charm, painted by Aidan.</p>
+    </div>
+
+    <nav class="footer-links" aria-label="Social and contact links">
+      {
+        links.map((l) => (
+          <a href={l.href} target="_blank" rel="noopener noreferrer">
+            {l.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+
+  <div class="container footer-bottom">
+    <span>© {year} ACC Paintings</span>
+    <a href="mailto:accpaintings@gmail.com">accpaintings@gmail.com</a>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--cream-deep);
+    border-top: 1px solid var(--line);
+    margin-top: 2rem;
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-block: 3rem 1.5rem;
+  }
+
+  .footer-title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+
+  .footer-brand p {
+    margin: 0;
+    max-width: 34ch;
+    font-size: 0.95rem;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+  }
+
+  .footer-links a {
+    color: var(--ink-soft);
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .footer-links a:hover {
+    color: var(--accent-deep);
+  }
+
+  .footer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    justify-content: space-between;
+    padding-block: 1.2rem 2rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+</style>

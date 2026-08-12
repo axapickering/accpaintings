@@ -1,0 +1,311 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const pricing = [
+  { size: '8" × 8"', pets: 'One pet', ship: '$75', pickup: '$60' },
+  { size: '8" × 10"', pets: 'One pet', ship: '$75', pickup: '$60' },
+  { size: '8" × 10"', pets: 'Two pets', ship: '$125', pickup: '$110' },
+  { size: '10" × 20"', pets: 'Three pets', ship: '$175', pickup: '$160' },
+  { size: '10" × 20"', pets: 'Four pets', ship: '$225', pickup: '$210' },
+];
+
+const steps = [
+  {
+    n: 1,
+    t: 'Submit a request',
+    d: 'Through the commission form, Etsy, or email — whatever is easiest.',
+  },
+  {
+    n: 2,
+    t: 'Send photo references',
+    d: 'Email clear, well-lit photos of your pet(s). Multiple photos welcome.',
+  },
+  {
+    n: 3,
+    t: 'Payment',
+    d: 'Upfront payment is collected securely through Stripe.',
+  },
+  {
+    n: 4,
+    t: 'Aidan paints',
+    d: 'Your portrait is hand-painted with care. Current turnaround is ~1–2 weeks.',
+  },
+  {
+    n: 5,
+    t: 'Preview & approve',
+    d: 'You get an email preview before it ships. Minor adjustments are included.',
+  },
+  {
+    n: 6,
+    t: 'Ships to you',
+    d: 'Carefully packed and sent with tracking.',
+  },
+];
+
+const faqs = [
+  {
+    q: 'Can you combine multiple pets from different photos?',
+    a: 'Yes! As long as each photo is clear and well-lit, separate images can be combined into one painting.',
+  },
+  {
+    q: 'I don’t have many good photos — is that okay?',
+    a: 'Send what you have. Aidan can assess whether they’ll work or suggest what would help.',
+  },
+  {
+    q: 'Can I request changes after it’s done?',
+    a: 'Small adjustments are included. Major changes may require an additional fee.',
+  },
+  {
+    q: 'What’s the refund policy?',
+    a: 'Because each piece is custom, refunds aren’t available once work begins. If there’s an issue, reach out directly and we’ll talk it through.',
+  },
+  {
+    q: 'Do these make good gifts?',
+    a: 'Absolutely — they’re a popular choice for birthdays, holidays, and memorials. Rush orders are available for an additional fee if you’re on a deadline.',
+  },
+  {
+    q: 'How long does it take?',
+    a: 'Average turnaround is currently 1–2 weeks, though it can vary. Need it sooner? Ask about a rush order.',
+  },
+];
+---
+
+<Layout title="Info & FAQ — ACC Paintings">
+  <section class="page-head">
+    <div class="container">
+      <p class="eyebrow">Important Info</p>
+      <h1>Pricing, process & FAQ</h1>
+      <p class="lead">
+        Everything you need to know before commissioning a portrait.
+      </p>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="section">
+    <div class="container">
+      <h2>Pricing</h2>
+      <p class="mb">
+        All prices include shipping & packaging. Local pickup in Capitol Hill,
+        Seattle is discounted.
+      </p>
+      <div class="table-wrap">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th>Canvas size</th>
+              <th>Pets</th>
+              <th>Shipped</th>
+              <th>Local pickup</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              pricing.map((row) => (
+                <tr>
+                  <td data-label="Canvas size">{row.size}</td>
+                  <td data-label="Pets">{row.pets}</td>
+                  <td data-label="Shipped">{row.ship}</td>
+                  <td data-label="Local pickup">{row.pickup}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process -->
+  <section class="section section-alt">
+    <div class="container">
+      <h2>How it works</h2>
+      <ol class="steps">
+        {
+          steps.map((s) => (
+            <li class="step card">
+              <span class="step-n">{s.n}</span>
+              <div>
+                <h3>{s.t}</h3>
+                <p>{s.d}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section">
+    <div class="container faq-wrap">
+      <h2>Frequently asked questions</h2>
+      <div class="faq-list">
+        {
+          faqs.map((f) => (
+            <details class="faq card">
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container center">
+      <h2>Still have a question?</h2>
+      <p class="mx-auto" style="max-width: 42ch;">
+        Reach out any time — Aidan is happy to help.
+      </p>
+      <div class="cta-actions">
+        <a href="mailto:accpaintings@gmail.com" class="btn btn-ghost">Email Aidan</a>
+        <a href="/commission" class="btn btn-primary">Start a commission</a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .page-head {
+    background: linear-gradient(180deg, var(--accent-soft), var(--cream));
+    border-bottom: 1px solid var(--line);
+    padding-block: clamp(2.5rem, 6vw, 4rem);
+  }
+  .page-head .lead {
+    margin-top: 0.5rem;
+  }
+  .section-alt {
+    background: var(--cream-deep);
+    border-block: 1px solid var(--line);
+  }
+  .mb {
+    margin-bottom: 1.5rem;
+    max-width: 60ch;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+  .price-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .price-table th,
+  .price-table td {
+    padding: 0.9rem 1.1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .price-table thead th {
+    background: var(--cream-deep);
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+  }
+  .price-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  .price-table td:nth-child(3),
+  .price-table td:nth-child(4) {
+    font-weight: 600;
+    color: var(--accent-deep);
+  }
+
+  .steps {
+    list-style: none;
+    counter-reset: step;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .step {
+    display: flex;
+    gap: 1rem;
+    padding: 1.4rem;
+    align-items: flex-start;
+  }
+  .step h3 {
+    margin-bottom: 0.2rem;
+  }
+  .step p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  .step-n {
+    flex: none;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.2rem;
+  }
+
+  .faq-wrap {
+    max-width: 760px;
+  }
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .faq {
+    padding: 0 1.3rem;
+  }
+  .faq summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding: 1.1rem 0;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    color: var(--ink);
+  }
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq summary::after {
+    content: '+';
+    font-size: 1.5rem;
+    color: var(--accent);
+    transition: transform 0.2s ease;
+    line-height: 1;
+  }
+  .faq[open] summary::after {
+    transform: rotate(45deg);
+  }
+  .faq p {
+    margin: 0;
+    padding: 0 0 1.2rem;
+    font-size: 0.98rem;
+  }
+
+  .cta-actions {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 640px) {
+    .steps {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

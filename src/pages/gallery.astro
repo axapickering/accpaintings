@@ -1,0 +1,44 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Gallery from '../components/Gallery.astro';
+---
+
+<Layout title="Gallery — ACC Paintings">
+  <section class="page-head">
+    <div class="container">
+      <p class="eyebrow">Gallery</p>
+      <h1>Portraits & past commissions</h1>
+      <p class="lead">
+        A growing collection of hand-painted pet portraits. Click any piece to
+        see it up close.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <Gallery />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container center">
+      <h2>Want one of your own?</h2>
+      <p class="mx-auto" style="max-width: 44ch;">
+        Commissions are open. Tell Aidan about your pet and get started.
+      </p>
+      <a href="/commission" class="btn btn-primary">Commission a portrait</a>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .page-head {
+    background: linear-gradient(180deg, var(--accent-soft), var(--cream));
+    border-bottom: 1px solid var(--line);
+    padding-block: clamp(2.5rem, 6vw, 4rem);
+  }
+  .page-head .lead {
+    margin-top: 0.5rem;
+  }
+</style>

@@ -1,0 +1,226 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │  PASTE THE GOOGLE FORM EMBED LINK HERE                               │
+// │                                                                     │
+// │  In Google Forms: click "Send" → the < > (embed) tab → copy the     │
+// │  URL inside src="..."  (it ends in /viewform?embedded=true).        │
+// │  Paste it between the quotes below, replacing the placeholder.       │
+// └─────────────────────────────────────────────────────────────────────┘
+const GOOGLE_FORM_EMBED_URL = '';
+
+const contactOptions = [
+  {
+    label: 'Etsy',
+    href: 'https://accpaintings.etsy.com',
+    desc: 'Order through the shop',
+  },
+  {
+    label: 'Email',
+    href: 'mailto:accpaintings@gmail.com',
+    desc: 'accpaintings@gmail.com',
+  },
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com/accpaintings',
+    desc: '@ACCPaintings',
+  },
+];
+---
+
+<Layout title="Commission a Portrait — ACC Paintings">
+  <section class="page-head">
+    <div class="container">
+      <p class="eyebrow">Commissions</p>
+      <h1>Commission a portrait</h1>
+      <p class="lead">
+        Fill out the form below and Aidan will follow up by email. Prefer Etsy
+        or email? Those work too — see the options at the bottom.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="local-banner card">
+        <span class="pin">📍</span>
+        <p>
+          <strong>Local to Capitol Hill, Seattle?</strong> Choose the local
+          pickup option on the form for a discounted rate.
+        </p>
+      </div>
+
+      {
+        GOOGLE_FORM_EMBED_URL ? (
+          <div class="form-frame card">
+            <iframe
+              src={GOOGLE_FORM_EMBED_URL}
+              title="ACC Paintings commission form"
+              loading="lazy"
+              width="100%"
+              height="1400"
+            >
+              Loading form…
+            </iframe>
+          </div>
+        ) : (
+          <div class="form-placeholder card">
+            <h2>Commission form goes here</h2>
+            <p>
+              The Google Form isn’t connected yet. To add it, open
+              <code>src/pages/commission.astro</code> and paste your Google
+              Form embed link into <code>GOOGLE_FORM_EMBED_URL</code>.
+            </p>
+            <p class="tiny">
+              In Google Forms: <strong>Send → &lt; &gt; (embed) → copy the src
+              URL</strong>. Until then, use the options below to reach Aidan.
+            </p>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Other ways to order</p>
+          <h2>Not into forms?</h2>
+        </div>
+      </div>
+      <div class="contact-grid">
+        {
+          contactOptions.map((c) => (
+            <a
+              class="contact-card card"
+              href={c.href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="contact-label">{c.label}</span>
+              <span class="contact-desc">{c.desc}</span>
+              <span class="contact-arrow" aria-hidden="true">→</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .page-head {
+    background: linear-gradient(180deg, var(--accent-soft), var(--cream));
+    border-bottom: 1px solid var(--line);
+    padding-block: clamp(2.5rem, 6vw, 4rem);
+  }
+  .page-head .lead {
+    margin-top: 0.5rem;
+  }
+  .section-alt {
+    background: var(--cream-deep);
+    border-block: 1px solid var(--line);
+  }
+
+  .local-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1rem 1.4rem;
+    margin-bottom: 1.6rem;
+    background: var(--accent-soft);
+    border-color: var(--accent-soft);
+  }
+  .local-banner .pin {
+    font-size: 1.4rem;
+  }
+  .local-banner p {
+    margin: 0;
+    color: var(--ink);
+    font-size: 0.98rem;
+  }
+
+  .form-frame {
+    padding: 0.5rem;
+    overflow: hidden;
+  }
+  .form-frame iframe {
+    border: none;
+    border-radius: 10px;
+    display: block;
+  }
+
+  .form-placeholder {
+    padding: clamp(2rem, 5vw, 3.5rem);
+    text-align: center;
+    border-style: dashed;
+    border-width: 2px;
+  }
+  .form-placeholder h2 {
+    color: var(--ink-soft);
+  }
+  .form-placeholder p {
+    max-width: 52ch;
+    margin-inline: auto;
+  }
+  .form-placeholder code {
+    background: var(--cream-deep);
+    padding: 0.1em 0.4em;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
+  .tiny {
+    font-size: 0.88rem;
+    margin-top: 1rem;
+  }
+
+  .section-head {
+    margin-bottom: 1.6rem;
+  }
+  .section-head h2 {
+    margin-bottom: 0;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  .contact-card {
+    padding: 1.4rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    position: relative;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .contact-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+  }
+  .contact-label {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .contact-desc {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+  }
+  .contact-arrow {
+    position: absolute;
+    top: 1.4rem;
+    right: 1.4rem;
+    color: var(--accent);
+    font-size: 1.2rem;
+  }
+
+  @media (max-width: 720px) {
+    .contact-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
