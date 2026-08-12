@@ -56,7 +56,6 @@ const INTERVAL = 10000;
                   />
                 ))}
               </div>
-              <figcaption>Reference</figcaption>
             </figure>
           )}
 
@@ -73,7 +72,6 @@ const INTERVAL = 10000;
               widths={[400, 800]}
               sizes="(max-width: 700px) 80vw, 380px"
             />
-            <figcaption>{slide.title ? `${slide.title} · Painting` : 'Painting'}</figcaption>
           </figure>
         </div>
       ))
@@ -145,15 +143,6 @@ const INTERVAL = 10000;
     box-shadow: var(--shadow);
     display: block;
     height: auto;
-  }
-
-  .frame figcaption {
-    font-family: var(--font-body);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--ink-soft);
   }
 
   /* Reference column */
