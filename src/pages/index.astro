@@ -9,10 +9,15 @@ import Gallery from '../components/Gallery.astro';
     <div class="container hero-inner">
       <div class="hero-copy">
         <p class="eyebrow">Custom Pet Portraits</p>
-        <h1>A little painting that captures your pet's whole personality.</h1>
+        <h1>Hi, I'm Aidan.</h1>
         <p class="lead">
-          Hand-painted portraits by Aidan that blend cartoon charm with your
-          pet's real likeness — meaningful, sentimental keepsakes made to last.
+          I recently started painting custom pet portraits. My background in
+          anime and cartoon art influences my style, resulting in portraits
+          that combine a pet's individuality with cartoon charm.
+        </p>
+        <p class="lead">
+          I started ACC Paintings to create meaningful, sentimental pieces that
+          capture the personality and spirit of the pets people love most.
         </p>
         <div class="hero-actions">
           <a href="/commission" class="btn btn-primary">Commission a portrait</a>
@@ -23,29 +28,6 @@ import Gallery from '../components/Gallery.astro';
         <span class="blob blob-1"></span>
         <span class="blob blob-2"></span>
         <span class="paw">🐾</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- Intro / about -->
-  <section class="section">
-    <div class="container about-grid">
-      <div>
-        <p class="eyebrow">The idea</p>
-        <h2>Your pet, with a little extra character.</h2>
-      </div>
-      <div>
-        <p>
-          Every painting brings together a pet's individuality with a bit of
-          cartoon charm — drawn from a background in anime and cartoon art. The
-          goal is simple: capture the personality that makes your companion
-          <em>them</em>, in a piece you'll want on the wall for years.
-        </p>
-        <p>
-          Portraits are painted from your photos, previewed before they ship,
-          and packed with care. Local to Capitol Hill, Seattle? There's a
-          discounted pickup option too.
-        </p>
       </div>
     </div>
   </section>
@@ -70,25 +52,30 @@ import Gallery from '../components/Gallery.astro';
       <div class="section-head">
         <div>
           <p class="eyebrow">Simple pricing</p>
-          <h2>Priced by canvas size</h2>
+          <h2>Priced by number of pets</h2>
         </div>
         <a href="/info" class="btn btn-ghost">Full details & FAQ</a>
       </div>
       <div class="price-grid">
         <div class="card price-card">
-          <span class="price-size">8 × 8</span>
           <span class="price-amt">$75</span>
-          <span class="price-desc">One pet</span>
+          <span class="price-desc">1 pet</span>
+          <span class="price-size">8 × 8 canvas</span>
         </div>
         <div class="card price-card">
-          <span class="price-size">8 × 10</span>
-          <span class="price-amt">$75–125</span>
-          <span class="price-desc">One or two pets</span>
+          <span class="price-amt">$125</span>
+          <span class="price-desc">2 pets</span>
+          <span class="price-size">8 × 10 canvas</span>
         </div>
         <div class="card price-card">
-          <span class="price-size">10 × 20</span>
-          <span class="price-amt">$175–225</span>
-          <span class="price-desc">Three or four pets</span>
+          <span class="price-amt">$175</span>
+          <span class="price-desc">3 pets</span>
+          <span class="price-size">10 × 20 canvas</span>
+        </div>
+        <div class="card price-card">
+          <span class="price-amt">$225</span>
+          <span class="price-desc">4 pets</span>
+          <span class="price-size">10 × 20 canvas</span>
         </div>
       </div>
       <p class="price-note">
@@ -176,15 +163,8 @@ import Gallery from '../components/Gallery.astro';
     filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.18));
   }
 
-  .about-grid,
   .section-head {
     display: grid;
-  }
-
-  .about-grid {
-    grid-template-columns: 0.8fr 1.2fr;
-    gap: 2.5rem;
-    align-items: start;
   }
 
   .section-alt {
@@ -205,7 +185,7 @@ import Gallery from '../components/Gallery.astro';
 
   .price-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.2rem;
   }
 
@@ -260,8 +240,7 @@ import Gallery from '../components/Gallery.astro';
   }
 
   @media (max-width: 820px) {
-    .hero-inner,
-    .about-grid {
+    .hero-inner {
       grid-template-columns: 1fr;
     }
     .hero-art {
@@ -269,9 +248,15 @@ import Gallery from '../components/Gallery.astro';
       order: -1;
     }
     .price-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
     }
     .section-head {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 460px) {
+    .price-grid {
       grid-template-columns: 1fr;
     }
   }

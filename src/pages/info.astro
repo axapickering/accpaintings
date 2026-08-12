@@ -2,11 +2,10 @@
 import Layout from '../layouts/Layout.astro';
 
 const pricing = [
-  { size: '8" × 8"', pets: 'One pet', ship: '$75', pickup: '$60' },
-  { size: '8" × 10"', pets: 'One pet', ship: '$75', pickup: '$60' },
-  { size: '8" × 10"', pets: 'Two pets', ship: '$125', pickup: '$110' },
-  { size: '10" × 20"', pets: 'Three pets', ship: '$175', pickup: '$160' },
-  { size: '10" × 20"', pets: 'Four pets', ship: '$225', pickup: '$210' },
+  { pets: '1 pet', size: '8" × 8"', ship: '$75', pickup: '$60' },
+  { pets: '2 pets', size: '8" × 10"', ship: '$125', pickup: '$110' },
+  { pets: '3 pets', size: '10" × 20"', ship: '$175', pickup: '$160' },
+  { pets: '4 pets', size: '10" × 20"', ship: '$225', pickup: '$210' },
 ];
 
 const steps = [
@@ -93,8 +92,8 @@ const faqs = [
         <table class="price-table">
           <thead>
             <tr>
-              <th>Canvas size</th>
               <th>Pets</th>
+              <th>Canvas size</th>
               <th>Shipped</th>
               <th>Local pickup</th>
             </tr>
@@ -103,8 +102,8 @@ const faqs = [
             {
               pricing.map((row) => (
                 <tr>
-                  <td data-label="Canvas size">{row.size}</td>
                   <td data-label="Pets">{row.pets}</td>
+                  <td data-label="Canvas size">{row.size}</td>
                   <td data-label="Shipped">{row.ship}</td>
                   <td data-label="Local pickup">{row.pickup}</td>
                 </tr>
