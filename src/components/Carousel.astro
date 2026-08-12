@@ -28,7 +28,7 @@ const slides = carousel
   .filter((s) => s.painting);
 
 // Rotation interval in milliseconds.
-const INTERVAL = 10000;
+const INTERVAL = 8000;
 ---
 
 <div class="carousel" data-carousel data-interval={INTERVAL}>
@@ -52,7 +52,7 @@ const INTERVAL = 10000;
                     src={ref}
                     alt={`Reference photo of ${slide.title ?? 'the pet'}`}
                     widths={[300, 600]}
-                    sizes="(max-width: 700px) 40vw, 260px"
+                    sizes="(max-width: 700px) 45vw, 300px"
                   />
                 ))}
               </div>
@@ -70,7 +70,7 @@ const INTERVAL = 10000;
                   : 'Custom pet portrait by ACC Paintings'
               }
               widths={[400, 800]}
-              sizes="(max-width: 700px) 80vw, 380px"
+              sizes="(max-width: 700px) 82vw, 460px"
             />
           </figure>
         </div>
@@ -95,7 +95,7 @@ const INTERVAL = 10000;
 
 <style>
   .carousel {
-    --stage-h: clamp(300px, 40vw, 420px);
+    --stage-h: clamp(360px, 48vw, 504px);
   }
 
   .carousel-stage {
@@ -149,7 +149,7 @@ const INTERVAL = 10000;
   .ref-frame :global(img) {
     max-height: calc(var(--stage-h) - 70px);
     width: auto;
-    max-width: 200px;
+    max-width: 240px;
   }
 
   .ref-stack {
@@ -160,14 +160,14 @@ const INTERVAL = 10000;
 
   .ref-stack.multi :global(img) {
     max-height: calc((var(--stage-h) - 90px) / 2);
-    max-width: 150px;
+    max-width: 180px;
   }
 
   /* Painting */
   .paint-frame :global(img) {
     max-height: calc(var(--stage-h) - 60px);
     width: auto;
-    max-width: min(420px, 60vw);
+    max-width: min(504px, 72vw);
   }
 
   .arrow {
