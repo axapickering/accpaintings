@@ -1,0 +1,294 @@
+---
+import { Image } from 'astro:assets';
+import { carousel } from '../data/carousel.js';
+
+const paintings = import.meta.glob('../gallery/*.{jpg,jpeg,png,webp,avif}', {
+  eager: true,
+});
+const references = import.meta.glob(
+  '../gallery/references/*.{jpg,jpeg,png,webp,avif}',
+  { eager: true }
+);
+
+const pick = (modules, file) => {
+  const entry = Object.entries(modules).find(
+    ([p]) => p.split('/').pop() === file
+  );
+  return entry ? entry[1].default : null;
+};
+
+const slides = carousel
+  .map((item) => ({
+    title: item.title,
+    painting: pick(paintings, item.painting),
+    references: (item.references ?? [])
+      .map((f) => pick(references, f))
+      .filter(Boolean),
+  }))
+  .filter((s) => s.painting);
+
+// Rotation interval in milliseconds.
+const INTERVAL = 10000;
+---
+
+<div class="carousel" data-carousel data-interval={INTERVAL}>
+  <div class="carousel-stage">
+    {
+      slides.map((slide, i) => (
+        <div
+          class:list={['cslide', { active: i === 0 }]}
+          hidden={i !== 0}
+        >
+          {slide.references.length > 0 && (
+            <figure class="frame ref-frame">
+              <div
+                class:list={[
+                  'ref-stack',
+                  { multi: slide.references.length > 1 },
+                ]}
+              >
+                {slide.references.map((ref) => (
+                  <Image
+                    src={ref}
+                    alt={`Reference photo of ${slide.title ?? 'the pet'}`}
+                    widths={[300, 600]}
+                    sizes="(max-width: 700px) 40vw, 260px"
+                  />
+                ))}
+              </div>
+              <figcaption>Reference</figcaption>
+            </figure>
+          )}
+
+          <span class="arrow" aria-hidden="true">→</span>
+
+          <figure class="frame paint-frame">
+            <Image
+              src={slide.painting}
+              alt={
+                slide.title
+                  ? `Painting of ${slide.title}`
+                  : 'Custom pet portrait by ACC Paintings'
+              }
+              widths={[400, 800]}
+              sizes="(max-width: 700px) 80vw, 380px"
+            />
+            <figcaption>{slide.title ? `${slide.title} · Painting` : 'Painting'}</figcaption>
+          </figure>
+        </div>
+      ))
+    }
+  </div>
+
+  {
+    slides.length > 1 && (
+      <div class="carousel-dots" role="tablist" aria-label="Choose a pair">
+        {slides.map((slide, i) => (
+          <button
+            class="cdot"
+            aria-label={`Show ${slide.title ?? `pair ${i + 1}`}`}
+            aria-current={i === 0 ? 'true' : 'false'}
+          />
+        ))}
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .carousel {
+    --stage-h: clamp(300px, 40vw, 420px);
+  }
+
+  .carousel-stage {
+    position: relative;
+    min-height: var(--stage-h);
+  }
+
+  .cslide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    min-height: var(--stage-h);
+  }
+
+  .cslide.active {
+    animation: cfade 0.6s ease;
+  }
+
+  .cslide[hidden] {
+    display: none;
+  }
+
+  @keyframes cfade {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .frame {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .frame :global(img) {
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    display: block;
+    height: auto;
+  }
+
+  .frame figcaption {
+    font-family: var(--font-body);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+
+  /* Reference column */
+  .ref-frame :global(img) {
+    max-height: calc(var(--stage-h) - 70px);
+    width: auto;
+    max-width: 200px;
+  }
+
+  .ref-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .ref-stack.multi :global(img) {
+    max-height: calc((var(--stage-h) - 90px) / 2);
+    max-width: 150px;
+  }
+
+  /* Painting */
+  .paint-frame :global(img) {
+    max-height: calc(var(--stage-h) - 60px);
+    width: auto;
+    max-width: min(420px, 60vw);
+  }
+
+  .arrow {
+    font-size: 1.8rem;
+    color: var(--accent);
+    flex: none;
+  }
+
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1.6rem;
+  }
+
+  .cdot {
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    border-radius: 50%;
+    border: none;
+    background: var(--line);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+
+  .cdot:hover {
+    background: var(--ink-soft);
+  }
+
+  .cdot[aria-current='true'] {
+    background: var(--accent);
+    transform: scale(1.25);
+  }
+
+  @media (max-width: 640px) {
+    .carousel {
+      --stage-h: auto;
+    }
+    .cslide {
+      flex-direction: column;
+      gap: 1rem;
+      padding-block: 1rem;
+    }
+    .arrow {
+      transform: rotate(90deg);
+    }
+    .ref-stack.multi {
+      flex-direction: row;
+    }
+    .ref-frame :global(img),
+    .ref-stack.multi :global(img) {
+      max-height: 200px;
+      max-width: 45vw;
+    }
+    .paint-frame :global(img) {
+      max-height: none;
+      max-width: 82vw;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cslide.active {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll('[data-carousel]').forEach((root) => {
+    const slides = Array.from(root.querySelectorAll('.cslide'));
+    const dots = Array.from(root.querySelectorAll('.cdot'));
+    if (slides.length < 2) return;
+
+    const interval = Number(root.dataset.interval) || 10000;
+    let current = 0;
+    let timer = null;
+
+    const show = (n) => {
+      current = (n + slides.length) % slides.length;
+      slides.forEach((s, k) => {
+        const on = k === current;
+        s.hidden = !on;
+        s.classList.toggle('active', on);
+      });
+      dots.forEach((d, k) =>
+        d.setAttribute('aria-current', k === current ? 'true' : 'false')
+      );
+    };
+
+    const start = () => {
+      stop();
+      timer = window.setInterval(() => show(current + 1), interval);
+    };
+    const stop = () => {
+      if (timer) window.clearInterval(timer);
+      timer = null;
+    };
+
+    dots.forEach((d, k) =>
+      d.addEventListener('click', () => {
+        show(k);
+        start();
+      })
+    );
+
+    root.addEventListener('mouseenter', stop);
+    root.addEventListener('mouseleave', start);
+
+    show(0);
+    start();
+  });
+</script>

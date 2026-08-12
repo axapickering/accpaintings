@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Gallery from '../components/Gallery.astro';
+import Carousel from '../components/Carousel.astro';
 ---
 
 <Layout>
@@ -38,11 +38,11 @@ import Gallery from '../components/Gallery.astro';
       <div class="section-head">
         <div>
           <p class="eyebrow">Recent work</p>
-          <h2>A few favorites</h2>
+          <h2>From photo to painting</h2>
         </div>
         <a href="/gallery" class="btn btn-ghost">View full gallery</a>
       </div>
-      <Gallery limit={6} />
+      <Carousel />
     </div>
   </section>
 
