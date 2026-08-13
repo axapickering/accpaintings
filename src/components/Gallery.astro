@@ -1,12 +1,41 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import { captions } from '../data/gallery-captions.js';
+import { carousel } from '../data/carousel.js';
 
 // Auto-discover every image in src/gallery/. Drop a file in that folder and
 // it shows up here — no code changes needed.
 const modules = import.meta.glob('../gallery/*.{jpg,jpeg,png,webp,avif}', {
   eager: true,
 });
+
+// Reference photos, so opening a painting can show what Aidan worked from.
+// carousel.js is already the painting → reference-photo mapping, so it's
+// reused here rather than duplicating the pairings. A painting with no entry
+// there simply opens without references.
+const referenceModules = import.meta.glob(
+  '../gallery/references/*.{jpg,jpeg,png,webp,avif}',
+  { eager: true }
+);
+
+const pickReference = (file) => {
+  const entry = Object.entries(referenceModules).find(
+    ([p]) => p.split('/').pop() === file
+  );
+  return entry ? entry[1].default : null;
+};
+
+// Reference photos are phone snapshots and can be several MB, so serve
+// resized webp rather than the originals.
+const referencesByPainting = {};
+for (const pair of carousel) {
+  const found = (pair.references ?? []).map(pickReference).filter(Boolean);
+  if (!found.length) continue;
+  const optimized = await Promise.all(
+    found.map((src) => getImage({ src, width: 700, format: 'webp' }))
+  );
+  referencesByPainting[pair.painting] = optimized.map((o) => o.src);
+}
 
 const { limit } = Astro.props;
 
@@ -54,6 +83,7 @@ images.forEach((img, i) => columns[i % DEFAULT_COLS].push({ img, order: i }));
           data-full={img.src.src}
           data-title={img.caption?.title ?? ''}
           data-note={img.caption?.note ?? ''}
+          data-refs={JSON.stringify(referencesByPainting[img.file] ?? [])}
           aria-label={img.caption?.title
             ? `View ${img.caption.title} larger`
             : 'View painting larger'}
@@ -82,10 +112,26 @@ images.forEach((img, i) => columns[i % DEFAULT_COLS].push({ img, order: i }));
 <!-- Lightbox -->
 <div class="lightbox" data-lightbox hidden>
   <button class="lightbox-close" data-lb-close aria-label="Close">&times;</button>
-  <figure class="lightbox-figure">
-    <img data-lb-img src="" alt="" />
-    <figcaption data-lb-cap class="lightbox-cap"></figcaption>
-  </figure>
+  <button
+    class="lightbox-nav lightbox-prev"
+    data-lb-prev
+    type="button"
+    aria-label="Previous painting">&#8249;</button>
+  <button
+    class="lightbox-nav lightbox-next"
+    data-lb-next
+    type="button"
+    aria-label="Next painting">&#8250;</button>
+  <div class="lightbox-inner">
+    <figure class="lightbox-figure">
+      <img data-lb-img src="" alt="" />
+      <figcaption data-lb-cap class="lightbox-cap"></figcaption>
+    </figure>
+    <aside class="lightbox-refs" data-lb-refs hidden>
+      <span class="lb-refs-label" data-lb-refs-label>Reference photo</span>
+      <div class="lb-refs-imgs" data-lb-refs-imgs></div>
+    </aside>
+  </div>
 </div>
 
 <style>
@@ -181,14 +227,23 @@ images.forEach((img, i) => columns[i % DEFAULT_COLS].push({ img, order: i }));
     display: none;
   }
 
+  /* Painting and reference photos side by side; stacks on narrow screens. */
+  .lightbox-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1rem, 3vw, 2.2rem);
+    max-width: 94vw;
+    max-height: 88vh;
+  }
+
   .lightbox-figure {
     margin: 0;
-    max-width: 92vw;
-    max-height: 88vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.8rem;
+    min-width: 0;
   }
 
   .lightbox-figure img {
@@ -198,6 +253,80 @@ images.forEach((img, i) => columns[i % DEFAULT_COLS].push({ img, order: i }));
     height: auto;
     border-radius: 8px;
     box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Reference column — deliberately smaller than the painting, since the
+     painting is the thing on show and these are just the source photos. */
+  .lightbox-refs {
+    /* Set from JS to however many references this painting has. */
+    --ref-count: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.55rem;
+    flex: 0 0 auto;
+    min-height: 0;
+  }
+
+  .lightbox-refs[hidden] {
+    display: none;
+  }
+
+  .lb-refs-label {
+    color: var(--cream);
+    opacity: 0.72;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .lb-refs-imgs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  /* Cap by BOTH width and height, with auto dimensions, so the browser scales
+     each photo down proportionally to fit — no distortion, no letterboxing.
+     The height cap is the column's share of the screen split between however
+     many references there are, which is what stops two portrait photos from
+     running off the bottom. */
+  /* :global() is required — these <img> elements are built by the script
+     below, so Astro's scoped [data-astro-cid] attribute is never on them and
+     a plain `img` selector silently matches nothing. */
+  .lb-refs-imgs :global(img) {
+    width: auto;
+    height: auto;
+    max-width: clamp(125px, 20.7vw, 228px);
+    max-height: calc(
+      (74vh - (var(--ref-count) - 1) * 0.55rem) / var(--ref-count)
+    );
+    object-fit: contain;
+    border-radius: 6px;
+    border: 2px solid rgba(255, 253, 250, 0.22);
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.7);
+  }
+
+  @media (max-width: 700px) {
+    .lightbox-inner {
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+    .lightbox-figure img {
+      max-height: 56vh;
+    }
+    /* Side by side under the painting, rather than a tall column. Here the
+       references share the available WIDTH instead of the height. */
+    .lb-refs-imgs {
+      flex-direction: row;
+      justify-content: center;
+    }
+    .lb-refs-imgs :global(img) {
+      max-width: calc(
+        (86vw - (var(--ref-count) - 1) * 0.55rem) / var(--ref-count)
+      );
+      max-height: 27.6vh;
+    }
   }
 
   .lightbox-cap {
@@ -225,6 +354,56 @@ images.forEach((img, i) => columns[i % DEFAULT_COLS].push({ img, order: i }));
     line-height: 1;
     cursor: pointer;
     transition: background 0.15s ease;
+  }
+
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 253, 250, 0.12);
+    color: var(--cream);
+    font-size: 2.1rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+  }
+
+  .lightbox-nav:hover {
+    background: rgba(255, 253, 250, 0.25);
+  }
+
+  .lightbox-nav[hidden] {
+    display: none;
+  }
+
+  .lightbox-prev {
+    left: 1.2rem;
+  }
+
+  .lightbox-next {
+    right: 1.2rem;
+  }
+
+  @media (max-width: 700px) {
+    .lightbox-nav {
+      width: 40px;
+      height: 40px;
+      font-size: 1.7rem;
+    }
+    .lightbox-prev {
+      left: 0.4rem;
+    }
+    .lightbox-next {
+      right: 0.4rem;
+    }
   }
 
   .lightbox-close:hover {
@@ -285,14 +464,67 @@ images.forEach((img, i) => columns[i % DEFAULT_COLS].push({ img, order: i }));
   if (lb) {
     const lbImg = lb.querySelector('[data-lb-img]');
     const lbCap = lb.querySelector('[data-lb-cap]');
+    const lbRefs = lb.querySelector('[data-lb-refs]');
+    const lbRefsLabel = lb.querySelector('[data-lb-refs-label]');
+    const lbRefsImgs = lb.querySelector('[data-lb-refs-imgs]');
+    const prevBtn = lb.querySelector('[data-lb-prev]');
+    const nextBtn = lb.querySelector('[data-lb-next]');
 
-    const open = (btn) => {
+    // Traversal order is the gallery's numeric order (newest → oldest), NOT
+    // the order items sit in the DOM — the masonry deal puts column 1 first,
+    // so walking the DOM would jump 14 → 11 → 8. data-order is the canonical
+    // sequence, so sort by it.
+    const triggers = Array.from(
+      document.querySelectorAll('[data-gallery] .gallery-item')
+    )
+      .sort((a, b) => Number(a.dataset.order) - Number(b.dataset.order))
+      .map((item) => item.querySelector('.gallery-trigger'))
+      .filter(Boolean);
+
+    let index = 0;
+
+    const render = (btn) => {
       const full = btn.getAttribute('data-full');
       const title = btn.getAttribute('data-title');
       const note = btn.getAttribute('data-note');
       lbImg.src = full;
       lbImg.alt = title || 'Custom pet portrait by ACC Paintings';
       lbCap.textContent = [title, note].filter(Boolean).join(' · ');
+
+      // Reference photos, when this painting has any paired with it.
+      let refs = [];
+      try {
+        refs = JSON.parse(btn.getAttribute('data-refs') || '[]');
+      } catch {
+        refs = [];
+      }
+      lbRefsLabel.textContent =
+        refs.length > 1 ? 'Reference photos' : 'Reference photo';
+      // Drives the max-height/max-width share in CSS, so two references each
+      // get half the room rather than overflowing the screen.
+      lbRefs.style.setProperty('--ref-count', String(refs.length || 1));
+      lbRefsImgs.replaceChildren(
+        ...refs.map((src) => {
+          const el = document.createElement('img');
+          el.src = src;
+          el.alt = title
+            ? `Reference photo for ${title}`
+            : 'Reference photo Aidan painted from';
+          return el;
+        })
+      );
+      lbRefs.hidden = refs.length === 0;
+    };
+
+    // Wraps at both ends, so the last painting steps round to the first.
+    const show = (i) => {
+      if (!triggers.length) return;
+      index = (i + triggers.length) % triggers.length;
+      render(triggers[index]);
+    };
+
+    const open = (btn) => {
+      show(triggers.indexOf(btn));
       lb.hidden = false;
       document.body.style.overflow = 'hidden';
     };
@@ -300,18 +532,69 @@ images.forEach((img, i) => columns[i % DEFAULT_COLS].push({ img, order: i }));
     const close = () => {
       lb.hidden = true;
       lbImg.src = '';
+      lbRefsImgs.replaceChildren();
+      lbRefs.hidden = true;
       document.body.style.overflow = '';
     };
 
-    document.querySelectorAll('[data-gallery] .gallery-trigger').forEach((btn) => {
-      btn.addEventListener('click', () => open(btn));
-    });
+    triggers.forEach((btn) => btn.addEventListener('click', () => open(btn)));
+
+    // Nothing to traverse with a single painting.
+    const solo = triggers.length < 2;
+    prevBtn.hidden = solo;
+    nextBtn.hidden = solo;
+    prevBtn.addEventListener('click', () => show(index - 1));
+    nextBtn.addEventListener('click', () => show(index + 1));
 
     lb.addEventListener('click', (e) => {
-      if (e.target === lb || e.target.hasAttribute('data-lb-close')) close();
+      // The inner wrapper counts as backdrop too, so clicking the gap beside
+      // the painting still closes.
+      if (
+        e.target === lb ||
+        e.target.classList.contains('lightbox-inner') ||
+        e.target.hasAttribute('data-lb-close')
+      )
+        close();
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !lb.hidden) close();
+      if (lb.hidden) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') show(index - 1);
+      else if (e.key === 'ArrowRight') show(index + 1);
+      else return;
+      e.preventDefault();
     });
+
+    // Swipe. Horizontal only — a mostly-vertical drag is a scroll attempt, not
+    // a request for the next painting.
+    const SWIPE_MIN = 45;
+    let touchX = null;
+    let touchY = null;
+
+    lb.addEventListener(
+      'touchstart',
+      (e) => {
+        const t = e.changedTouches[0];
+        touchX = t.clientX;
+        touchY = t.clientY;
+      },
+      { passive: true }
+    );
+
+    lb.addEventListener(
+      'touchend',
+      (e) => {
+        if (touchX === null) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - touchX;
+        const dy = t.clientY - touchY;
+        touchX = null;
+        touchY = null;
+        if (Math.abs(dx) < SWIPE_MIN || Math.abs(dx) <= Math.abs(dy)) return;
+        // Swiping left pulls the next painting in from the right.
+        show(dx < 0 ? index + 1 : index - 1);
+      },
+      { passive: true }
+    );
   }
 </script>

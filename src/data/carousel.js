@@ -41,6 +41,7 @@ export const carousel = [
     title: 'Two Dogs',
   },
   { painting: '7-seamus.jpg', references: ['seamus-ref.jpg'], title: 'Seamus' },
+  { painting: '6-bug.jpg', references: ['bug-ref.jpg'], title: 'Bug' },
   {
     painting: '5-black-cat.jpg',
     references: ['black-cat-ref.jpg'],
@@ -51,4 +52,5 @@ export const carousel = [
     references: ['fat-tuxedo-cat-ref.jpg'],
     title: 'Fat Tuxedo Cat',
   },
+  { painting: '1-harry.jpg', references: ['harry-ref.png'], title: 'Harry' },
 ];
