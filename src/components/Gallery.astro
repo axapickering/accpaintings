@@ -10,6 +10,15 @@ const modules = import.meta.glob('../gallery/*.{jpg,jpeg,png,webp,avif}', {
 
 const { limit } = Astro.props;
 
+// Newest first. File names carry a number prefix (1-harry.jpg … 14-bernie.jpeg)
+// and the highest number is the most recent painting, so sort descending on it.
+// Plain numeric sort, not alphabetical — otherwise "10-" sorts before "2-".
+// A file added without a prefix has no known date, so it sorts to the end.
+const rank = (file) => {
+  const m = file.match(/^(\d+)-/);
+  return m ? Number(m[1]) : -1;
+};
+
 let images = Object.entries(modules)
   .map(([path, mod]) => {
     const file = path.split('/').pop();
@@ -19,7 +28,7 @@ let images = Object.entries(modules)
       caption: captions[file] ?? null,
     };
   })
-  .sort((a, b) => a.file.localeCompare(b.file));
+  .sort((a, b) => rank(b.file) - rank(a.file) || a.file.localeCompare(b.file));
 
 if (limit) images = images.slice(0, limit);
 ---
