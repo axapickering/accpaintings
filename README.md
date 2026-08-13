@@ -95,9 +95,18 @@ or pickup → price, contact details, and send. Submissions are emailed to
 access key set near the top of that component. The key is safe to keep in the
 repo — it only routes to the address the account was registered with.
 
-If prices change, edit the `PRICES` table in the `<script>` block at the bottom
-of the same file. The home page has its own copy of the numbers in
-`src/components/PriceCalculator.astro`, so **update both** or they'll disagree.
+### Changing prices
+
+All pricing lives in **`src/data/pricing.js`** — one file, one table. Edit a
+`shipped` or `pickup` number there and every place it appears updates together:
+
+- the pricing table on the **Info** page
+- the price finder on the **home** page
+- the **commission form** (and the price quoted in the email Aidan receives)
+
+Canvas sizes, the "Shipped / Local pickup" labels, and the number-of-pets
+buttons all come from the same file. Adding a fifth tier to the table adds its
+button to both forms automatically.
 
 ### Why the form doesn't take photo uploads
 

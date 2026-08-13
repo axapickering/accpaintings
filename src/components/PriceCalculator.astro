@@ -1,13 +1,7 @@
 ---
 // Interactive price finder for the home page.
-// Pricing is also encoded in the client script below (kept in sync here for
-// the visible cards / server render).
-const petOptions = [
-  { n: 1, label: 'pet' },
-  { n: 2, label: 'pets' },
-  { n: 3, label: 'pets' },
-  { n: 4, label: 'pets' },
-];
+// All prices and labels come from src/data/pricing.js — edit them there.
+import { petOptions, delivery } from '../data/pricing.js';
 ---
 
 <div class="calc card" data-calc>
@@ -47,24 +41,19 @@ const petOptions = [
       </button>
     </div>
     <div class="calc-options calc-options-delivery" data-options="delivery">
-      <button
-        class="calc-opt calc-opt-wide"
-        type="button"
-        data-delivery="shipped"
-        aria-pressed="false"
-      >
-        <span class="opt-l">Shipped</span>
-        <span class="opt-sub">Includes shipping &amp; packaging</span>
-      </button>
-      <button
-        class="calc-opt calc-opt-wide"
-        type="button"
-        data-delivery="pickup"
-        aria-pressed="false"
-      >
-        <span class="opt-l">Local pickup</span>
-        <span class="opt-sub">Capitol Hill, Seattle</span>
-      </button>
+      {
+        Object.entries(delivery).map(([key, opt]) => (
+          <button
+            class="calc-opt calc-opt-wide"
+            type="button"
+            data-delivery={key}
+            aria-pressed="false"
+          >
+            <span class="opt-l">{opt.label}</span>
+            <span class="opt-sub">{opt.note}</span>
+          </button>
+        ))
+      }
     </div>
   </div>
 
@@ -285,13 +274,12 @@ const petOptions = [
 </style>
 
 <script>
-  const PRICES = {
-    1: { shipped: 75, pickup: 60, canvas: '8×8 or 8×10 canvas' },
-    2: { shipped: 125, pickup: 110, canvas: '8×10 canvas' },
-    3: { shipped: 175, pickup: 160, canvas: '10×20 canvas' },
-    4: { shipped: 225, pickup: 210, canvas: '10×20 canvas' },
-  };
-  const DELIVERY_LABEL = { shipped: 'Shipped', pickup: 'Local pickup' };
+  import {
+    tierFor,
+    delivery,
+    canvasShort,
+    petWord,
+  } from '../data/pricing.js';
 
   document.querySelectorAll('[data-calc]').forEach((root) => {
     const state = { pets: null, delivery: null };
@@ -331,11 +319,9 @@ const petOptions = [
 
     const updateResult = () => {
       if (state.pets == null || state.delivery == null) return;
-      const info = PRICES[state.pets];
-      const amount = info[state.delivery];
+      const amount = tierFor(state.pets)[state.delivery];
       priceEl.textContent = `$${amount}`;
-      const petWord = state.pets === 1 ? 'pet' : 'pets';
-      summaryEl.textContent = `${state.pets} ${petWord} · ${DELIVERY_LABEL[state.delivery]} · ${info.canvas}`;
+      summaryEl.textContent = `${state.pets} ${petWord(state.pets)} · ${delivery[state.delivery].label} · ${canvasShort(state.pets)} canvas`;
       reveal(resultEl);
     };
 
@@ -361,7 +347,7 @@ const petOptions = [
         root
           .querySelectorAll('[data-delivery]')
           .forEach((b) => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
-        answerStep('delivery', DELIVERY_LABEL[d]);
+        answerStep('delivery', delivery[d].label);
         updateResult();
       });
     });

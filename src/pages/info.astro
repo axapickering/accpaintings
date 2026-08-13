@@ -1,12 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-const pricing = [
-  { pets: '1 pet', size: '8" × 8" or 8" × 10"', ship: '$75', pickup: '$60' },
-  { pets: '2 pets', size: '8" × 10"', ship: '$125', pickup: '$110' },
-  { pets: '3 pets', size: '10" × 20"', ship: '$175', pickup: '$160' },
-  { pets: '4 pets', size: '10" × 20"', ship: '$225', pickup: '$210' },
-];
+import { tiers, canvasLong, petWord } from '../data/pricing.js';
 
 const steps = [
   {
@@ -100,12 +95,14 @@ const faqs = [
           </thead>
           <tbody>
             {
-              pricing.map((row) => (
+              tiers.map((tier) => (
                 <tr>
-                  <td data-label="Pets">{row.pets}</td>
-                  <td data-label="Canvas size">{row.size}</td>
-                  <td data-label="Shipped">{row.ship}</td>
-                  <td data-label="Local pickup">{row.pickup}</td>
+                  <td data-label="Pets">
+                    {tier.pets} {petWord(tier.pets)}
+                  </td>
+                  <td data-label="Canvas size">{canvasLong(tier.pets)}</td>
+                  <td data-label="Shipped">${tier.shipped}</td>
+                  <td data-label="Local pickup">${tier.pickup}</td>
                 </tr>
               ))
             }
