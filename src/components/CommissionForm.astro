@@ -16,12 +16,11 @@
 // pre-filled email so a request is never lost.
 const WEB3FORMS_ACCESS_KEY = '334adf6a-87b9-4380-91e9-2cc6e7cba6b3';
 
-const petOptions = [
-  { n: 1, label: 'pet' },
-  { n: 2, label: 'pets' },
-  { n: 3, label: 'pets' },
-  { n: 4, label: 'pets' },
-];
+// All prices, canvas sizes and delivery labels live in src/data/pricing.js.
+import { petOptions, delivery, tierFor, inches } from '../data/pricing.js';
+
+// Canvas is only a question when there's more than one option (a single pet).
+const canvasChoices = tierFor(1).canvas;
 ---
 
 <div class="cform card" data-cform data-access-key={WEB3FORMS_ACCESS_KEY}>
@@ -61,14 +60,19 @@ const petOptions = [
       </button>
     </div>
     <div class="cf-options cf-options-canvas" data-options="canvas">
-      <button class="cf-opt cf-opt-wide" type="button" data-canvas="8×8" aria-pressed="false">
-        <span class="opt-l">8" × 8"</span>
-        <span class="opt-sub">Square</span>
-      </button>
-      <button class="cf-opt cf-opt-wide" type="button" data-canvas="8×10" aria-pressed="false">
-        <span class="opt-l">8" × 10"</span>
-        <span class="opt-sub">Portrait — same price</span>
-      </button>
+      {
+        canvasChoices.map((c) => (
+          <button
+            class="cf-opt cf-opt-wide"
+            type="button"
+            data-canvas={c.size}
+            aria-pressed="false"
+          >
+            <span class="opt-l">{inches(c.size)}</span>
+            <span class="opt-sub">{c.note}</span>
+          </button>
+        ))
+      }
     </div>
   </div>
 
@@ -82,14 +86,19 @@ const petOptions = [
       </button>
     </div>
     <div class="cf-options cf-options-delivery" data-options="delivery">
-      <button class="cf-opt cf-opt-wide" type="button" data-delivery="shipped" aria-pressed="false">
-        <span class="opt-l">Shipped</span>
-        <span class="opt-sub">Includes shipping &amp; packaging</span>
-      </button>
-      <button class="cf-opt cf-opt-wide" type="button" data-delivery="pickup" aria-pressed="false">
-        <span class="opt-l">Local pickup</span>
-        <span class="opt-sub">Capitol Hill, Seattle</span>
-      </button>
+      {
+        Object.entries(delivery).map(([key, opt]) => (
+          <button
+            class="cf-opt cf-opt-wide"
+            type="button"
+            data-delivery={key}
+            aria-pressed="false"
+          >
+            <span class="opt-l">{opt.label}</span>
+            <span class="opt-sub">{opt.note}</span>
+          </button>
+        ))
+      }
     </div>
   </div>
 
@@ -155,7 +164,7 @@ const petOptions = [
   <!-- Success state -->
   <div class="cf-success" data-success hidden>
     <span class="cf-success-emoji" aria-hidden="true">🎉</span>
-    <h3>Request sent!</h3>
+    <h3>Request sent, you’re almost done!</h3>
     <p>
       Thanks — your commission request is on its way to Aidan. She’ll reply to
       <strong data-success-email>your email</strong> soon.
@@ -480,15 +489,14 @@ const petOptions = [
 </style>
 
 <script>
-  // Price + canvas by pet count. Canvas for 1 pet is chosen by the client.
-  const PRICES = {
-    1: { shipped: 75, pickup: 60 },
-    2: { shipped: 125, pickup: 110 },
-    3: { shipped: 175, pickup: 160 },
-    4: { shipped: 225, pickup: 210 },
-  };
-  const CANVAS_BY_PETS = { 2: '8×10', 3: '10×20', 4: '10×20' };
-  const DELIVERY_LABEL = { shipped: 'Shipped', pickup: 'Local pickup' };
+  import {
+    tierFor,
+    delivery,
+    canvasShort,
+    canvasIsChoice,
+    petWord,
+  } from '../data/pricing.js';
+
   const EMAIL = 'accpaintings@gmail.com';
 
   document.querySelectorAll('[data-cform]').forEach((root) => {
@@ -523,21 +531,23 @@ const petOptions = [
     };
 
     const canvasLabel = () => {
-      if (state.pets === 1) return state.canvas ? `${state.canvas} canvas` : '';
-      return `${CANVAS_BY_PETS[state.pets]} canvas`;
+      // When the tier offers a choice, use what the customer picked.
+      if (canvasIsChoice(state.pets)) {
+        return state.canvas ? `${state.canvas} canvas` : '';
+      }
+      return `${canvasShort(state.pets)} canvas`;
     };
 
     const ready = () =>
       state.pets != null &&
       state.delivery != null &&
-      (state.pets !== 1 || state.canvas != null);
+      (!canvasIsChoice(state.pets) || state.canvas != null);
 
     const updateResult = () => {
       if (!ready()) return;
-      const amount = PRICES[state.pets][state.delivery];
+      const amount = tierFor(state.pets)[state.delivery];
       priceEl.textContent = `$${amount}`;
-      const petWord = state.pets === 1 ? 'pet' : 'pets';
-      summaryEl.textContent = `${state.pets} ${petWord} · ${canvasLabel()} · ${DELIVERY_LABEL[state.delivery]}`;
+      summaryEl.textContent = `${state.pets} ${petWord(state.pets)} · ${canvasLabel()} · ${delivery[state.delivery].label}`;
       reveal(details);
     };
 
@@ -549,9 +559,9 @@ const petOptions = [
         root
           .querySelectorAll('[data-pets]')
           .forEach((b) => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
-        answerStep('pets', `${n} ${n === 1 ? 'pet' : 'pets'}`);
+        answerStep('pets', `${n} ${petWord(n)}`);
 
-        if (n === 1) {
+        if (canvasIsChoice(n)) {
           reveal(stepEl('canvas'));
         } else {
           // No canvas choice for multiple pets — hide that step if it was shown.
@@ -590,7 +600,7 @@ const petOptions = [
         root
           .querySelectorAll('[data-delivery]')
           .forEach((b) => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
-        answerStep('delivery', DELIVERY_LABEL[d]);
+        answerStep('delivery', delivery[d].label);
         updateResult();
       });
     });
@@ -612,12 +622,12 @@ const petOptions = [
     };
 
     const meta = () => {
-      const amount = PRICES[state.pets][state.delivery];
-      const petWord = state.pets === 1 ? 'pet' : 'pets';
+      const amount = tierFor(state.pets)[state.delivery];
+      const pets = `${state.pets} ${petWord(state.pets)}`;
       return {
         amount,
-        subject: `Commission request — ${state.pets} ${petWord}`,
-        summary: `${state.pets} ${petWord} · ${canvasLabel()} · ${DELIVERY_LABEL[state.delivery]}`,
+        subject: `Commission request — ${pets}`,
+        summary: `${pets} · ${canvasLabel()} · ${delivery[state.delivery].label}`,
       };
     };
 
@@ -630,7 +640,7 @@ const petOptions = [
         '——————————————',
         `Pets: ${state.pets}`,
         `Canvas: ${canvasLabel()}`,
-        `Delivery: ${DELIVERY_LABEL[state.delivery]}`,
+        `Delivery: ${delivery[state.delivery].label}`,
         `Price: $${amount}`,
         '',
         `Name: ${data.get('name') || ''}`,
@@ -667,7 +677,7 @@ const petOptions = [
       data.append('from_name', 'ACC Paintings commission form');
       data.append('Pets', String(state.pets));
       data.append('Canvas', canvasLabel());
-      data.append('Delivery', DELIVERY_LABEL[state.delivery]);
+      data.append('Delivery', delivery[state.delivery].label);
       data.append('Price', `$${amount}`);
       data.append('Summary', summary);
 
