@@ -3,7 +3,9 @@ import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 import Carousel from '../components/Carousel.astro';
 import PriceCalculator from '../components/PriceCalculator.astro';
-import juni from '../gallery/juni.png';
+// Lives in src/images/, not src/gallery/ — everything in src/gallery/ is shown
+// on the Gallery page automatically, and Juni is the hero image only.
+import juni from '../images/juni.png';
 ---
 
 <Layout>
