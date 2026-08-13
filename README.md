@@ -16,23 +16,36 @@ into a folder.** No code required.
 
 ### Add a painting to the main Gallery page
 
-1. Put the image file into **`src/gallery/`**.
-2. Use a `.jpg`, `.jpeg`, `.png`, or `.webp` file.
-3. That's it — it appears on the Gallery page automatically. Images are resized
-   and optimized for the web on their own, so photos straight from your phone
-   are fine.
+1. Name the file with the **next number up** from the highest one already in
+   `src/gallery/`, then a dash, then any name you like — `15-luna.jpg`.
+2. Put it into **`src/gallery/`**.
+3. Use a `.jpg`, `.jpeg`, `.png`, or `.webp` file.
+4. That's it — it appears at the top of the Gallery page automatically. Images
+   are resized and optimized for the web on their own, so photos straight from
+   your phone are fine.
 
-Name the files however you like (e.g. `bella.jpg`, `2024-milo.jpg`). To
-**remove** a painting, delete its file from `src/gallery/`.
+**The number prefix is what orders the gallery** — highest number first, so the
+newest painting leads the page. A file with no number still shows up, but it
+sinks to the bottom. Gaps are fine after a deletion; no renumbering needed.
+
+To **remove** a painting, delete its file from `src/gallery/`.
+
+> Renaming an existing painting? Its file name may also appear in
+> `src/data/carousel.js` and `src/data/gallery-captions.js`. A carousel entry
+> pointing at a name that no longer exists **silently vanishes from the home
+> page** — no error, the slide just stops appearing. Search both files for the
+> old name.
 
 #### Optional: give a painting a title/caption
 
 Open **`src/data/gallery-captions.js`** and add a line using the image's file
 name. Skipping this is fine — the image just shows with no caption.
 
+Use the full file name, number prefix and all:
+
 ```js
 export const captions = {
-  'bella.jpg': { title: 'Bella', note: 'Acrylic on 8×8 canvas' },
+  '15-luna.jpg': { title: 'Luna', note: 'Acrylic on 8×8 canvas' },
 };
 ```
 
@@ -47,11 +60,18 @@ worked from, next to the finished painting).
 
 ```js
 export const carousel = [
-  { painting: 'bella.jpg', references: ['bella-photo.jpg'], title: 'Bella' },
+  { painting: '15-luna.jpg', references: ['luna-ref.jpg'], title: 'Luna' },
   // two reference photos are supported too:
-  { painting: 'luna-max.jpg', references: ['luna.jpg', 'max.jpg'], title: 'Luna & Max' },
+  { painting: '16-luna-max.jpeg', references: ['luna.jpg', 'max.jpg'], title: 'Luna & Max' },
 ];
 ```
+
+Copy the painting's file name **exactly** — number prefix included, and with
+the right extension. Some paintings are `.jpg` and the newer ones are `.jpeg`;
+a mismatch makes the slide disappear without any error.
+
+New pairs go at the **top** of the list so the carousel opens on recent work.
+Reference photos don't need a number — only paintings do.
 
 > The `references/` subfolder is deliberately **not** shown on the main Gallery
 > page — reference photos only appear in the carousel.
@@ -68,14 +88,31 @@ If you'd rather not use a code editor, you can upload right from GitHub:
 
 ## The commission form
 
-The Commission page embeds a Google Form. To connect it:
+The Commission page uses a built-in step-by-step form
+(`src/components/CommissionForm.astro`): number of pets → canvas size → shipped
+or pickup → price, contact details, and send. Submissions are emailed to
+`accpaintings@gmail.com` through [Web3Forms](https://web3forms.com), using the
+access key set near the top of that component. The key is safe to keep in the
+repo — it only routes to the address the account was registered with.
 
-1. In Google Forms: **Send → `< >` (embed) tab → copy the `src` URL**.
-2. Paste it into `GOOGLE_FORM_EMBED_URL` near the top of
-   **`src/pages/commission.astro`**.
+If prices change, edit the `PRICES` table in the `<script>` block at the bottom
+of the same file. The home page has its own copy of the numbers in
+`src/components/PriceCalculator.astro`, so **update both** or they'll disagree.
 
-Until it's set, the page shows a friendly placeholder plus Etsy/email/Instagram
-links.
+### Why the form doesn't take photo uploads
+
+It used to. Web3Forms only accepts file attachments on a **paid PRO plan** — on
+the free plan it rejects the *entire* submission, so every request failed and
+nothing arrived. The form now sends text only, and the success screen asks the
+customer to reply to the confirmation email with their photos (which also
+preserves full resolution, rather than squeezing under a 5 MB cap).
+
+To take photos in the form again, either subscribe to Web3Forms PRO and restore
+the `<input type="file" name="attachment">` field, or move uploads to a
+Cloudflare Pages Function backed by R2 storage.
+
+If Web3Forms is ever unreachable, the form falls back to opening a pre-filled
+email to Aidan rather than showing a dead end — so a request is never lost.
 
 ---
 
@@ -114,8 +151,10 @@ src/
 │  └─ Carousel.astro       # home-page photo→painting carousel
 ├─ layouts/
 │  └─ Layout.astro         # shared page shell (head, fonts, header/footer)
-├─ gallery/                # ← paintings go here
-│  └─ references/          # ← reference photos go here
+├─ gallery/                # ← paintings go here, named 1-name.jpg, 2-name.jpg…
+│  └─ references/          # ← reference photos go here (no number needed)
+├─ images/                 # site images that are NOT gallery paintings
+│  └─ juni.png             # home-page hero
 ├─ data/
 │  ├─ gallery-captions.js  # optional gallery captions
 │  └─ carousel.js          # carousel pairings
@@ -124,13 +163,42 @@ src/
 public/                    # static files served as-is (favicon, etc.)
 ```
 
-The `sample-*.jpg` files in `src/gallery/` are placeholders — delete them once
-real paintings are added.
+Note that `src/images/` is separate from `src/gallery/` on purpose: everything
+in `src/gallery/` is published to the Gallery page automatically, so the hero
+image lives outside it to avoid showing up twice.
 
 ---
 
 ## Deploying
 
-The site builds to static files (`npm run build` → `dist/`), so it can be
-hosted for free on Netlify, Cloudflare Pages, GitHub Pages, or similar, then
-pointed at `accpaintings.com`.
+The site is live at **https://www.accpaintings.com**, hosted free on
+**Cloudflare Pages** and built from this repo.
+
+**You don't deploy manually.** Every push to `main` triggers a rebuild, and the
+new version is live a couple of minutes later. That includes uploading images
+through the GitHub website — commit the files and the site updates itself.
+
+| Setting | Value |
+| --- | --- |
+| Host | Cloudflare Pages (project `accpaintings`) |
+| Build command | `npm run build` |
+| Output directory | `dist` |
+| Preview URL | `accpaintings.pages.dev` |
+
+### DNS
+
+DNS is **not** managed by Cloudflare — it stays with the domain registrar:
+
+- `www` is a CNAME pointing at `accpaintings.pages.dev`
+- the bare `accpaintings.com` uses the registrar's URL forwarding to 301-redirect
+  to `https://www.accpaintings.com`
+
+The apex is a redirect rather than a record because DNS doesn't allow a CNAME
+on a root domain. `www` is the canonical hostname, which is also what
+`astro.config.mjs` declares in `site` — keep the two in agreement.
+
+### Checking a deploy
+
+The Cloudflare dashboard shows build logs under the project's **Deployments**
+tab. A red build there means the site kept serving the previous version, so a
+broken build never takes the live site down.
