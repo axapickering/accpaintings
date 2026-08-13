@@ -31,12 +31,24 @@ let images = Object.entries(modules)
   .sort((a, b) => rank(b.file) - rank(a.file) || a.file.localeCompare(b.file));
 
 if (limit) images = images.slice(0, limit);
+
+// Masonry columns are built by hand rather than with CSS `columns`, because
+// CSS multi-column fills column-by-column: it would pour the newest five
+// paintings down column 1 and the oldest down column 3, so the top row read
+// new / middle / old. Dealing round-robin instead (14→col1, 13→col2, 12→col3,
+// 11→col1 …) puts the newest across the top row, which is what people read
+// first. The client script below re-deals when the column count changes.
+const DEFAULT_COLS = 3;
+const columns = Array.from({ length: DEFAULT_COLS }, () => []);
+images.forEach((img, i) => columns[i % DEFAULT_COLS].push({ img, order: i }));
 ---
 
 <div class="gallery" data-gallery>
   {
-    images.map((img, i) => (
-      <figure class="gallery-item">
+    columns.map((col) => (
+      <div class="gallery-col">
+        {col.map(({ img, order: i }) => (
+          <figure class="gallery-item" data-order={i}>
         <button
           class="gallery-trigger"
           data-full={img.src.src}
@@ -59,8 +71,10 @@ if (limit) images = images.slice(0, limit);
               {img.caption.note && <span class="cap-note">{img.caption.note}</span>}
             </figcaption>
           )}
-        </button>
-      </figure>
+            </button>
+          </figure>
+        ))}
+      </div>
     ))
   }
 </div>
@@ -76,13 +90,23 @@ if (limit) images = images.slice(0, limit);
 
 <style>
   .gallery {
-    columns: 3 260px;
-    column-gap: 1.1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.1rem;
+  }
+
+  /* Equal-width columns that don't stretch to match each other's height —
+     that's what keeps the ragged masonry bottom edge. */
+  .gallery-col {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
   }
 
   .gallery-item {
-    margin: 0 0 1.1rem;
-    break-inside: avoid;
+    margin: 0;
   }
 
   .gallery-trigger {
@@ -209,6 +233,54 @@ if (limit) images = images.slice(0, limit);
 </style>
 
 <script>
+  // Re-deal the masonry columns when the viewport changes.
+  //
+  // Items are dealt across columns (newest → col 1, next → col 2, …) so the
+  // top row is the newest work. The server renders 3 columns; this adjusts
+  // the count to fit the width, matching the 260px minimum the old CSS
+  // `columns: 3 260px` used.
+  const gallery = document.querySelector('[data-gallery]');
+  if (gallery) {
+    const MIN_COL = 260;
+    const GAP = 17.6; // 1.1rem at a 16px root
+    const MAX_COLS = 3;
+
+    // Canonical newest-first order, independent of how they're dealt now.
+    const items = Array.from(gallery.querySelectorAll('.gallery-item')).sort(
+      (a, b) => Number(a.dataset.order) - Number(b.dataset.order)
+    );
+
+    const fitCols = () => {
+      const width = gallery.clientWidth;
+      const n = Math.floor((width + GAP) / (MIN_COL + GAP));
+      return Math.max(1, Math.min(MAX_COLS, n));
+    };
+
+    let current = null;
+
+    const deal = (n) => {
+      if (n === current) return;
+      current = n;
+      const cols = Array.from({ length: n }, () => {
+        const col = document.createElement('div');
+        col.className = 'gallery-col';
+        return col;
+      });
+      // appendChild moves the existing node, so lightbox click handlers and
+      // already-decoded images survive the re-deal.
+      items.forEach((item, i) => cols[i % n].appendChild(item));
+      gallery.replaceChildren(...cols);
+    };
+
+    deal(fitCols());
+
+    let frame = null;
+    addEventListener('resize', () => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => deal(fitCols()));
+    });
+  }
+
   const lb = document.querySelector('[data-lightbox]');
   if (lb) {
     const lbImg = lb.querySelector('[data-lb-img]');

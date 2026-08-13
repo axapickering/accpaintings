@@ -17,15 +17,25 @@ const pick = (modules, file) => {
   return entry ? entry[1].default : null;
 };
 
+// Newest first, driven by the painting's number prefix rather than by where
+// the entry sits in carousel.js — so a new pair added anywhere in that file
+// still leads the carousel. Matches how the Gallery page orders itself.
+const rank = (file) => {
+  const m = file.match(/^(\d+)-/);
+  return m ? Number(m[1]) : -1;
+};
+
 const slides = carousel
   .map((item) => ({
     title: item.title,
+    file: item.painting,
     painting: pick(paintings, item.painting),
     references: (item.references ?? [])
       .map((f) => pick(references, f))
       .filter(Boolean),
   }))
-  .filter((s) => s.painting);
+  .filter((s) => s.painting)
+  .sort((a, b) => rank(b.file) - rank(a.file));
 
 // Rotation interval in milliseconds.
 const INTERVAL = 8000;

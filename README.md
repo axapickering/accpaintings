@@ -70,8 +70,9 @@ Copy the painting's file name **exactly** — number prefix included, and with
 the right extension. Some paintings are `.jpg` and the newer ones are `.jpeg`;
 a mismatch makes the slide disappear without any error.
 
-New pairs go at the **top** of the list so the carousel opens on recent work.
-Reference photos don't need a number — only paintings do.
+You can add the entry anywhere in the list — the carousel sorts itself by the
+painting's number prefix, so the newest pair always shows first. Reference
+photos don't need a number; only paintings do.
 
 > The `references/` subfolder is deliberately **not** shown on the main Gallery
 > page — reference photos only appear in the carousel.
