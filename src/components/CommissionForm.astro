@@ -1,19 +1,19 @@
 ---
 // Interactive commission form.
 // Flow: how many pets → (if 1 pet) which canvas → shipped/pickup → price +
-// contact details + photo upload → emailed to Aidan via Web3Forms.
+// contact details → emailed to Aidan via Web3Forms.
 //
-// ┌──────────────────────────────────────────────────────────────────────┐
-// │  PASTE YOUR WEB3FORMS ACCESS KEY HERE                                 │
-// │                                                                      │
-// │  1. Go to https://web3forms.com and enter accpaintings@gmail.com     │
-// │     — they email you a free "access key" (a long UUID).              │
-// │  2. Paste it between the quotes below.                                │
-// │                                                                      │
-// │  This key is safe to expose publicly; it only routes submissions to  │
-// │  the email you signed up with. Until it's set, the form falls back   │
-// │  to opening a pre-filled email (without the photo attachments).      │
-// └──────────────────────────────────────────────────────────────────────┘
+// NO PHOTO UPLOAD HERE — and that's deliberate. Web3Forms only accepts file
+// attachments on a paid PRO plan; on the free plan it rejects the *whole*
+// submission, so every request silently failed. The form now sends text only
+// and the success screen asks the customer to reply with their photos.
+// To take photos in the form again, either subscribe to Web3Forms PRO or
+// move uploads to a Cloudflare Pages Function backed by R2.
+//
+// The access key below is safe to expose publicly; it only routes
+// submissions to the email the account was registered with. If it's ever
+// blank, or if the API call fails, the form falls back to opening a
+// pre-filled email so a request is never lost.
 const WEB3FORMS_ACCESS_KEY = '334adf6a-87b9-4380-91e9-2cc6e7cba6b3';
 
 const petOptions = [
@@ -125,19 +125,13 @@ const petOptions = [
         <textarea name="notes" rows="2" placeholder="Deadlines, questions, special requests…"></textarea>
       </label>
 
-      <label class="cf-field cf-field-full">
-        <span>Reference photos <em>(recommended)</em></span>
-        <input
-          type="file"
-          name="attachment"
-          accept="image/*"
-          multiple
-          data-photos
-        />
-        <span class="cf-file-hint" data-file-hint>
-          Clear, well-lit photos work best. Up to 5 images, ~5 MB total.
-        </span>
-      </label>
+      <div class="cf-field cf-field-full cf-photos-note">
+        <span>Reference photos</span>
+        <p>
+          Send these by replying to the confirmation email — that way full
+          resolution comes through. Clear, well-lit shots work best.
+        </p>
+      </div>
     </div>
 
     <!-- Honeypot spam trap (leave blank) -->
@@ -150,7 +144,7 @@ const petOptions = [
     />
 
     <p class="cf-hint">
-      Your details and photos go straight to Aidan, who’ll reply by email.
+      Your details go straight to Aidan, who’ll reply by email.
     </p>
     <p class="cf-status" data-status hidden></p>
     <button type="submit" class="btn btn-primary cf-submit" data-submit>
@@ -165,6 +159,10 @@ const petOptions = [
     <p>
       Thanks — your commission request is on its way to Aidan. She’ll reply to
       <strong data-success-email>your email</strong> soon.
+    </p>
+    <p class="cf-success-photos">
+      <strong>One more thing:</strong> reply to that email with photos of your
+      pet(s) and Aidan can get started.
     </p>
   </div>
 </div>
@@ -391,26 +389,15 @@ const petOptions = [
     box-shadow: 0 0 0 3px var(--accent-soft);
   }
 
-  .cf-field input[type='file'] {
-    padding: 0.55rem 0.7rem;
-    cursor: pointer;
-  }
-  .cf-field input[type='file']::file-selector-button {
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 0.85rem;
-    color: var(--accent-deep);
+  .cf-photos-note {
     background: var(--accent-soft);
-    border: none;
-    border-radius: 8px;
-    padding: 0.45rem 0.8rem;
-    margin-right: 0.8rem;
-    cursor: pointer;
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
   }
-  .cf-file-hint {
-    font-size: 0.82rem !important;
-    font-weight: 400 !important;
-    color: var(--ink-soft) !important;
+  .cf-photos-note p {
+    margin: 0.25rem 0 0;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
   }
 
   /* Honeypot — visually hidden */
@@ -466,6 +453,13 @@ const petOptions = [
     margin: 0;
     max-width: 40ch;
     margin-inline: auto;
+  }
+  .cf-success-photos {
+    margin-top: 1rem !important;
+    padding: 0.85rem 1rem;
+    background: var(--accent-soft);
+    border-radius: 10px;
+    font-size: 0.92rem;
   }
 
   @media (max-width: 480px) {
@@ -610,9 +604,6 @@ const petOptions = [
     const statusEl = root.querySelector('[data-status]');
     const submitBtn = root.querySelector('[data-submit]');
     const successEl = root.querySelector('[data-success]');
-    const photosInput = root.querySelector('[data-photos]');
-
-    const MAX_TOTAL_BYTES = 5 * 1024 * 1024; // ~5 MB Web3Forms free-tier limit
 
     const setStatus = (msg, isError) => {
       statusEl.textContent = msg;
@@ -630,7 +621,8 @@ const petOptions = [
       };
     };
 
-    // Fallback used until a Web3Forms key is set: open a pre-filled email.
+    // Used when no key is set, and as the rescue path if the API call fails —
+    // a request should never dead-end on an error screen.
     const mailtoFallback = (data) => {
       const { amount, subject } = meta();
       const body = [
@@ -669,17 +661,6 @@ const petOptions = [
         return;
       }
 
-      // Check total photo size before sending.
-      const files = photosInput?.files ? Array.from(photosInput.files) : [];
-      const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
-      if (totalBytes > MAX_TOTAL_BYTES) {
-        setStatus(
-          'Those photos add up to over 5 MB. Please send fewer or smaller images (you can also email them separately).',
-          true
-        );
-        return;
-      }
-
       const { amount, subject, summary } = meta();
       data.append('access_key', accessKey);
       data.append('subject', subject);
@@ -714,12 +695,14 @@ const petOptions = [
           throw new Error(out.message || 'Submission failed');
         }
       } catch (err) {
+        // Don't dead-end: hand the customer a pre-filled email instead.
         setStatus(
-          'Something went wrong sending your request. Please try again, or email accpaintings@gmail.com directly.',
+          'We couldn’t send that automatically, so we’ve opened an email to Aidan with your details — just hit send.',
           true
         );
         submitBtn.disabled = false;
         submitBtn.textContent = 'Send commission request';
+        mailtoFallback(data);
       }
     });
   });
