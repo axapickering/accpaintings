@@ -1,0 +1,726 @@
+---
+// Interactive commission form.
+// Flow: how many pets → (if 1 pet) which canvas → shipped/pickup → price +
+// contact details + photo upload → emailed to Aidan via Web3Forms.
+//
+// ┌──────────────────────────────────────────────────────────────────────┐
+// │  PASTE YOUR WEB3FORMS ACCESS KEY HERE                                 │
+// │                                                                      │
+// │  1. Go to https://web3forms.com and enter accpaintings@gmail.com     │
+// │     — they email you a free "access key" (a long UUID).              │
+// │  2. Paste it between the quotes below.                                │
+// │                                                                      │
+// │  This key is safe to expose publicly; it only routes submissions to  │
+// │  the email you signed up with. Until it's set, the form falls back   │
+// │  to opening a pre-filled email (without the photo attachments).      │
+// └──────────────────────────────────────────────────────────────────────┘
+const WEB3FORMS_ACCESS_KEY = '501172';
+
+const petOptions = [
+  { n: 1, label: 'pet' },
+  { n: 2, label: 'pets' },
+  { n: 3, label: 'pets' },
+  { n: 4, label: 'pets' },
+];
+---
+
+<div class="cform card" data-cform data-access-key={WEB3FORMS_ACCESS_KEY}>
+  <!-- Step 1: number of pets -->
+  <div class="cf-step" data-step="pets">
+    <div class="cf-q">
+      <span class="cf-qtext">How many pets would you like painted?</span>
+      <span class="cf-answer" data-answer="pets" hidden></span>
+      <button class="cf-change" data-change="pets" type="button" hidden>
+        Change
+      </button>
+    </div>
+    <div class="cf-options cf-options-pets" data-options="pets">
+      {
+        petOptions.map((o) => (
+          <button
+            class="cf-opt cf-opt-pet"
+            type="button"
+            data-pets={o.n}
+            aria-pressed="false"
+          >
+            <span class="opt-n">{o.n}</span>
+            <span class="opt-l">{o.label}</span>
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- Step 1b: canvas size (only shown for a single pet) -->
+  <div class="cf-step" data-step="canvas" hidden>
+    <div class="cf-q">
+      <span class="cf-qtext">Which canvas size?</span>
+      <span class="cf-answer" data-answer="canvas" hidden></span>
+      <button class="cf-change" data-change="canvas" type="button" hidden>
+        Change
+      </button>
+    </div>
+    <div class="cf-options cf-options-canvas" data-options="canvas">
+      <button class="cf-opt cf-opt-wide" type="button" data-canvas="8×8" aria-pressed="false">
+        <span class="opt-l">8" × 8"</span>
+        <span class="opt-sub">Square</span>
+      </button>
+      <button class="cf-opt cf-opt-wide" type="button" data-canvas="8×10" aria-pressed="false">
+        <span class="opt-l">8" × 10"</span>
+        <span class="opt-sub">Portrait — same price</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 2: delivery -->
+  <div class="cf-step" data-step="delivery" hidden>
+    <div class="cf-q">
+      <span class="cf-qtext">Shipped, or local pickup?</span>
+      <span class="cf-answer" data-answer="delivery" hidden></span>
+      <button class="cf-change" data-change="delivery" type="button" hidden>
+        Change
+      </button>
+    </div>
+    <div class="cf-options cf-options-delivery" data-options="delivery">
+      <button class="cf-opt cf-opt-wide" type="button" data-delivery="shipped" aria-pressed="false">
+        <span class="opt-l">Shipped</span>
+        <span class="opt-sub">Includes shipping &amp; packaging</span>
+      </button>
+      <button class="cf-opt cf-opt-wide" type="button" data-delivery="pickup" aria-pressed="false">
+        <span class="opt-l">Local pickup</span>
+        <span class="opt-sub">Capitol Hill, Seattle</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 3: details + submit -->
+  <form class="cf-details" data-details hidden>
+    <div class="cf-price">
+      <div>
+        <span class="cf-price-label">Your price</span>
+        <span class="cf-price-amt" data-price></span>
+      </div>
+      <span class="cf-price-summary" data-summary></span>
+    </div>
+
+    <div class="cf-fields">
+      <label class="cf-field">
+        <span>Your name</span>
+        <input type="text" name="name" autocomplete="name" required />
+      </label>
+      <label class="cf-field">
+        <span>Email</span>
+        <input type="email" name="email" autocomplete="email" required />
+      </label>
+      <label class="cf-field cf-field-full">
+        <span>Tell me about your pet(s)</span>
+        <textarea
+          name="details"
+          rows="3"
+          placeholder="Names, personalities, anything you'd love captured…"
+        ></textarea>
+      </label>
+      <label class="cf-field cf-field-full">
+        <span>Anything else? <em>(optional)</em></span>
+        <textarea name="notes" rows="2" placeholder="Deadlines, questions, special requests…"></textarea>
+      </label>
+
+      <label class="cf-field cf-field-full">
+        <span>Reference photos <em>(recommended)</em></span>
+        <input
+          type="file"
+          name="attachment"
+          accept="image/*"
+          multiple
+          data-photos
+        />
+        <span class="cf-file-hint" data-file-hint>
+          Clear, well-lit photos work best. Up to 5 images, ~5 MB total.
+        </span>
+      </label>
+    </div>
+
+    <!-- Honeypot spam trap (leave blank) -->
+    <input
+      type="checkbox"
+      name="botcheck"
+      class="cf-botcheck"
+      tabindex="-1"
+      autocomplete="off"
+    />
+
+    <p class="cf-hint">
+      Your details and photos go straight to Aidan, who’ll reply by email.
+    </p>
+    <p class="cf-status" data-status hidden></p>
+    <button type="submit" class="btn btn-primary cf-submit" data-submit>
+      Send commission request
+    </button>
+  </form>
+
+  <!-- Success state -->
+  <div class="cf-success" data-success hidden>
+    <span class="cf-success-emoji" aria-hidden="true">🎉</span>
+    <h3>Request sent!</h3>
+    <p>
+      Thanks — your commission request is on its way to Aidan. She’ll reply to
+      <strong data-success-email>your email</strong> soon.
+    </p>
+  </div>
+</div>
+
+<style>
+  .cform {
+    padding: clamp(1.6rem, 4vw, 2.6rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+  }
+
+  .cf-step[hidden],
+  .cf-details[hidden] {
+    display: none;
+  }
+
+  .cf-step.reveal,
+  .cf-details.reveal,
+  .cf-success.reveal {
+    animation: cfIn 0.35s ease;
+  }
+
+  @keyframes cfIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Question row */
+  .cf-q {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .cf-qtext {
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 3vw, 1.7rem);
+    color: var(--ink);
+    transition: color 0.25s ease;
+  }
+
+  .cf-step.answered .cf-qtext {
+    color: var(--ink-soft);
+    opacity: 0.7;
+  }
+
+  .cf-step.answered .cf-options {
+    display: none;
+  }
+
+  .cf-answer {
+    margin-left: auto;
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+  }
+
+  .cf-change {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0.2rem;
+  }
+  .cf-change:hover {
+    color: var(--accent-deep);
+  }
+
+  /* Options */
+  .cf-options-pets {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.9rem;
+  }
+  .cf-options-canvas,
+  .cf-options-delivery {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.9rem;
+  }
+
+  .cf-opt {
+    border: 1.5px solid var(--line);
+    background: var(--white);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease,
+      background 0.15s ease, box-shadow 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .cf-opt:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-sm);
+  }
+  .cf-opt[aria-pressed='true'] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .cf-opt-pet {
+    padding: 1.3rem 0.5rem;
+    gap: 0.15rem;
+  }
+  .opt-n {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-deep);
+    line-height: 1;
+  }
+  .opt-l {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+
+  .cf-opt-wide {
+    padding: 1.1rem 1.2rem;
+    align-items: flex-start;
+    text-align: left;
+    gap: 0.25rem;
+  }
+  .cf-opt-wide .opt-l {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--ink);
+  }
+  .opt-sub {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+
+  /* Price banner */
+  .cf-price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.4rem 1.2rem;
+    padding: 1.2rem 1.4rem;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent-soft), var(--white));
+    border: 1px solid var(--line);
+    margin-bottom: 1.6rem;
+  }
+  .cf-price-label {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--accent-deep);
+    display: block;
+  }
+  .cf-price-amt {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 5vw, 2.8rem);
+    font-weight: 700;
+    color: var(--accent-deep);
+    line-height: 1.05;
+  }
+  .cf-price-summary {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+
+  /* Fields */
+  .cf-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .cf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .cf-field-full {
+    grid-column: 1 / -1;
+  }
+  .cf-field span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .cf-field em {
+    font-weight: 400;
+    color: var(--ink-soft);
+  }
+  .cf-field input,
+  .cf-field textarea {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--ink);
+    background: var(--white);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 0.7rem 0.85rem;
+    width: 100%;
+    resize: vertical;
+  }
+  .cf-field input:focus,
+  .cf-field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .cf-field input[type='file'] {
+    padding: 0.55rem 0.7rem;
+    cursor: pointer;
+  }
+  .cf-field input[type='file']::file-selector-button {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--accent-deep);
+    background: var(--accent-soft);
+    border: none;
+    border-radius: 8px;
+    padding: 0.45rem 0.8rem;
+    margin-right: 0.8rem;
+    cursor: pointer;
+  }
+  .cf-file-hint {
+    font-size: 0.82rem !important;
+    font-weight: 400 !important;
+    color: var(--ink-soft) !important;
+  }
+
+  /* Honeypot — visually hidden */
+  .cf-botcheck {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .cf-hint {
+    margin: 1.2rem 0 0;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+
+  .cf-status {
+    margin: 0.8rem 0 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+  .cf-status[hidden] {
+    display: none;
+  }
+  .cf-status.error {
+    color: var(--accent-deep);
+  }
+
+  .cf-submit {
+    margin-top: 1rem;
+  }
+  .cf-submit[disabled] {
+    opacity: 0.65;
+    cursor: default;
+  }
+
+  .cf-success {
+    text-align: center;
+    padding: 1rem 0.5rem;
+  }
+  .cf-success[hidden] {
+    display: none;
+  }
+  .cf-success-emoji {
+    font-size: 2.6rem;
+  }
+  .cf-success h3 {
+    margin: 0.4rem 0 0.3rem;
+    font-size: 1.6rem;
+  }
+  .cf-success p {
+    margin: 0;
+    max-width: 40ch;
+    margin-inline: auto;
+  }
+
+  @media (max-width: 480px) {
+    .cf-options-pets {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .cf-options-canvas,
+    .cf-options-delivery {
+      grid-template-columns: 1fr;
+    }
+    .cf-answer {
+      margin-left: 0;
+    }
+    .cf-fields {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Price + canvas by pet count. Canvas for 1 pet is chosen by the client.
+  const PRICES = {
+    1: { shipped: 75, pickup: 60 },
+    2: { shipped: 125, pickup: 110 },
+    3: { shipped: 175, pickup: 160 },
+    4: { shipped: 225, pickup: 210 },
+  };
+  const CANVAS_BY_PETS = { 2: '8×10', 3: '10×20', 4: '10×20' };
+  const DELIVERY_LABEL = { shipped: 'Shipped', pickup: 'Local pickup' };
+  const EMAIL = 'accpaintings@gmail.com';
+
+  document.querySelectorAll('[data-cform]').forEach((root) => {
+    const state = { pets: null, canvas: null, delivery: null };
+
+    const stepEl = (n) => root.querySelector(`[data-step="${n}"]`);
+    const answerEl = (n) => root.querySelector(`[data-answer="${n}"]`);
+    const changeEl = (n) => root.querySelector(`[data-change="${n}"]`);
+    const details = root.querySelector('[data-details]');
+    const priceEl = root.querySelector('[data-price]');
+    const summaryEl = root.querySelector('[data-summary]');
+
+    const reveal = (el) => {
+      if (!el.hidden) return;
+      el.hidden = false;
+      el.classList.remove('reveal');
+      void el.offsetWidth;
+      el.classList.add('reveal');
+    };
+
+    const answerStep = (name, text) => {
+      stepEl(name).classList.add('answered');
+      const chip = answerEl(name);
+      chip.textContent = text;
+      chip.hidden = false;
+      changeEl(name).hidden = false;
+    };
+    const editStep = (name) => {
+      stepEl(name).classList.remove('answered');
+      answerEl(name).hidden = true;
+      changeEl(name).hidden = true;
+    };
+
+    const canvasLabel = () => {
+      if (state.pets === 1) return state.canvas ? `${state.canvas} canvas` : '';
+      return `${CANVAS_BY_PETS[state.pets]} canvas`;
+    };
+
+    const ready = () =>
+      state.pets != null &&
+      state.delivery != null &&
+      (state.pets !== 1 || state.canvas != null);
+
+    const updateResult = () => {
+      if (!ready()) return;
+      const amount = PRICES[state.pets][state.delivery];
+      priceEl.textContent = `$${amount}`;
+      const petWord = state.pets === 1 ? 'pet' : 'pets';
+      summaryEl.textContent = `${state.pets} ${petWord} · ${canvasLabel()} · ${DELIVERY_LABEL[state.delivery]}`;
+      reveal(details);
+    };
+
+    // Pets
+    root.querySelectorAll('[data-pets]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const n = Number(btn.getAttribute('data-pets'));
+        state.pets = n;
+        root
+          .querySelectorAll('[data-pets]')
+          .forEach((b) => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
+        answerStep('pets', `${n} ${n === 1 ? 'pet' : 'pets'}`);
+
+        if (n === 1) {
+          reveal(stepEl('canvas'));
+        } else {
+          // No canvas choice for multiple pets — hide that step if it was shown.
+          state.canvas = null;
+          const c = stepEl('canvas');
+          c.hidden = true;
+          editStep('canvas');
+          root
+            .querySelectorAll('[data-canvas]')
+            .forEach((b) => b.setAttribute('aria-pressed', 'false'));
+          reveal(stepEl('delivery'));
+        }
+        updateResult();
+      });
+    });
+
+    // Canvas (single pet)
+    root.querySelectorAll('[data-canvas]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const c = btn.getAttribute('data-canvas');
+        state.canvas = c;
+        root
+          .querySelectorAll('[data-canvas]')
+          .forEach((b) => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
+        answerStep('canvas', `${c}`);
+        reveal(stepEl('delivery'));
+        updateResult();
+      });
+    });
+
+    // Delivery
+    root.querySelectorAll('[data-delivery]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const d = btn.getAttribute('data-delivery');
+        state.delivery = d;
+        root
+          .querySelectorAll('[data-delivery]')
+          .forEach((b) => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
+        answerStep('delivery', DELIVERY_LABEL[d]);
+        updateResult();
+      });
+    });
+
+    // Change buttons
+    root.querySelectorAll('[data-change]').forEach((btn) => {
+      btn.addEventListener('click', () => editStep(btn.getAttribute('data-change')));
+    });
+
+    const accessKey = root.dataset.accessKey || '';
+    const statusEl = root.querySelector('[data-status]');
+    const submitBtn = root.querySelector('[data-submit]');
+    const successEl = root.querySelector('[data-success]');
+    const photosInput = root.querySelector('[data-photos]');
+
+    const MAX_TOTAL_BYTES = 5 * 1024 * 1024; // ~5 MB Web3Forms free-tier limit
+
+    const setStatus = (msg, isError) => {
+      statusEl.textContent = msg;
+      statusEl.classList.toggle('error', !!isError);
+      statusEl.hidden = !msg;
+    };
+
+    const meta = () => {
+      const amount = PRICES[state.pets][state.delivery];
+      const petWord = state.pets === 1 ? 'pet' : 'pets';
+      return {
+        amount,
+        subject: `Commission request — ${state.pets} ${petWord}`,
+        summary: `${state.pets} ${petWord} · ${canvasLabel()} · ${DELIVERY_LABEL[state.delivery]}`,
+      };
+    };
+
+    // Fallback used until a Web3Forms key is set: open a pre-filled email.
+    const mailtoFallback = (data) => {
+      const { amount, subject } = meta();
+      const body = [
+        'Commission details',
+        '——————————————',
+        `Pets: ${state.pets}`,
+        `Canvas: ${canvasLabel()}`,
+        `Delivery: ${DELIVERY_LABEL[state.delivery]}`,
+        `Price: $${amount}`,
+        '',
+        `Name: ${data.get('name') || ''}`,
+        `Email: ${data.get('email') || ''}`,
+        '',
+        'About the pet(s):',
+        `${data.get('details') || ''}`,
+        '',
+        'Anything else:',
+        `${data.get('notes') || ''}`,
+        '',
+        '(Please attach your reference photos to this email.)',
+      ].join('\n');
+      window.location.href = `mailto:${EMAIL}?subject=${encodeURIComponent(
+        subject
+      )}&body=${encodeURIComponent(body)}`;
+    };
+
+    details.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!details.reportValidity()) return;
+
+      const data = new FormData(details);
+
+      // No key yet → mailto fallback (photos can't ride along with mailto).
+      if (!accessKey) {
+        mailtoFallback(data);
+        return;
+      }
+
+      // Check total photo size before sending.
+      const files = photosInput?.files ? Array.from(photosInput.files) : [];
+      const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+      if (totalBytes > MAX_TOTAL_BYTES) {
+        setStatus(
+          'Those photos add up to over 5 MB. Please send fewer or smaller images (you can also email them separately).',
+          true
+        );
+        return;
+      }
+
+      const { amount, subject, summary } = meta();
+      data.append('access_key', accessKey);
+      data.append('subject', subject);
+      data.append('from_name', 'ACC Paintings commission form');
+      data.append('Pets', String(state.pets));
+      data.append('Canvas', canvasLabel());
+      data.append('Delivery', DELIVERY_LABEL[state.delivery]);
+      data.append('Price', `$${amount}`);
+      data.append('Summary', summary);
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+      setStatus('');
+
+      try {
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          body: data,
+        });
+        const out = await res.json().catch(() => ({}));
+        if (res.ok && out.success) {
+          const email = data.get('email') || 'your email';
+          const target = successEl.querySelector('[data-success-email]');
+          if (target) target.textContent = email;
+          root
+            .querySelectorAll('.cf-step, [data-details]')
+            .forEach((el) => (el.hidden = true));
+          successEl.hidden = false;
+          successEl.classList.add('reveal');
+          successEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          throw new Error(out.message || 'Submission failed');
+        }
+      } catch (err) {
+        setStatus(
+          'Something went wrong sending your request. Please try again, or email accpaintings@gmail.com directly.',
+          true
+        );
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send commission request';
+      }
+    });
+  });
+</script>

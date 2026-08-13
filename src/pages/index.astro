@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 import Carousel from '../components/Carousel.astro';
+import PriceCalculator from '../components/PriceCalculator.astro';
 import juni from '../gallery/juni.png';
 ---
 
@@ -45,8 +46,7 @@ import juni from '../gallery/juni.png';
     <div class="container">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Recent work</p>
-          <h2>From photo to painting</h2>
+          <p class="eyebrow">Gallery</p>
         </div>
       </div>
       <Carousel />
@@ -61,9 +61,12 @@ import juni from '../gallery/juni.png';
     <div class="container">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Simple pricing</p>
+          <p class="eyebrow">Pricing</p>
         </div>
         <a href="/info" class="btn btn-ghost">Full details & FAQ</a>
+      </div>
+      <div class="price-calc-wrap">
+        <PriceCalculator />
       </div>
     </div>
   </section>
@@ -153,6 +156,11 @@ import juni from '../gallery/juni.png';
 
   .section-head h2 {
     margin-bottom: 0;
+  }
+
+  .price-calc-wrap {
+    max-width: 720px;
+    margin-inline: auto;
   }
 
   .carousel-cta {

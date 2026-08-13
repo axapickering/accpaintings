@@ -1,14 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-
-// ┌─────────────────────────────────────────────────────────────────────┐
-// │  PASTE THE GOOGLE FORM EMBED LINK HERE                               │
-// │                                                                     │
-// │  In Google Forms: click "Send" → the < > (embed) tab → copy the     │
-// │  URL inside src="..."  (it ends in /viewform?embedded=true).        │
-// │  Paste it between the quotes below, replacing the placeholder.       │
-// └─────────────────────────────────────────────────────────────────────┘
-const GOOGLE_FORM_EMBED_URL = '';
+import CommissionForm from '../components/CommissionForm.astro';
 
 const contactOptions = [
   {
@@ -42,43 +34,16 @@ const contactOptions = [
   </section>
 
   <section class="section">
-    <div class="container">
+    <div class="container form-container">
       <div class="local-banner card">
         <span class="pin">📍</span>
         <p>
           <strong>Local to Capitol Hill, Seattle?</strong> Choose the local
-          pickup option on the form for a discounted rate.
+          pickup option below for a discounted rate.
         </p>
       </div>
 
-      {
-        GOOGLE_FORM_EMBED_URL ? (
-          <div class="form-frame card">
-            <iframe
-              src={GOOGLE_FORM_EMBED_URL}
-              title="ACC Paintings commission form"
-              loading="lazy"
-              width="100%"
-              height="1400"
-            >
-              Loading form…
-            </iframe>
-          </div>
-        ) : (
-          <div class="form-placeholder card">
-            <h2>Commission form goes here</h2>
-            <p>
-              The Google Form isn’t connected yet. To add it, open
-              <code>src/pages/commission.astro</code> and paste your Google
-              Form embed link into <code>GOOGLE_FORM_EMBED_URL</code>.
-            </p>
-            <p class="tiny">
-              In Google Forms: <strong>Send → &lt; &gt; (embed) → copy the src
-              URL</strong>. Until then, use the options below to reach Aidan.
-            </p>
-          </div>
-        )
-      }
+      <CommissionForm />
     </div>
   </section>
 
@@ -142,38 +107,8 @@ const contactOptions = [
     font-size: 0.98rem;
   }
 
-  .form-frame {
-    padding: 0.5rem;
-    overflow: hidden;
-  }
-  .form-frame iframe {
-    border: none;
-    border-radius: 10px;
-    display: block;
-  }
-
-  .form-placeholder {
-    padding: clamp(2rem, 5vw, 3.5rem);
-    text-align: center;
-    border-style: dashed;
-    border-width: 2px;
-  }
-  .form-placeholder h2 {
-    color: var(--ink-soft);
-  }
-  .form-placeholder p {
-    max-width: 52ch;
-    margin-inline: auto;
-  }
-  .form-placeholder code {
-    background: var(--cream-deep);
-    padding: 0.1em 0.4em;
-    border-radius: 5px;
-    font-size: 0.9em;
-  }
-  .tiny {
-    font-size: 0.88rem;
-    margin-top: 1rem;
+  .form-container {
+    max-width: 760px;
   }
 
   .section-head {
