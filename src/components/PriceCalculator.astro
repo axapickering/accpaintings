@@ -64,7 +64,10 @@ import { petOptions, delivery } from '../data/pricing.js';
       <span class="calc-price" data-price></span>
       <span class="calc-summary" data-summary></span>
     </div>
-    <a href="/commission" class="btn btn-primary">Start a commission</a>
+    <!-- href gains ?pets=&delivery= once both questions are answered, so the
+         commission form can pick up where this left off. Plain /commission is
+         the no-JS fallback. -->
+    <a href="/commission" class="btn btn-primary" data-cta>Start a commission</a>
   </div>
 </div>
 
@@ -290,6 +293,7 @@ import { petOptions, delivery } from '../data/pricing.js';
     const resultEl = root.querySelector('[data-result]');
     const priceEl = root.querySelector('[data-price]');
     const summaryEl = root.querySelector('[data-summary]');
+    const ctaEl = root.querySelector('[data-cta]');
 
     const reveal = (el) => {
       if (!el.hidden) return;
@@ -322,6 +326,16 @@ import { petOptions, delivery } from '../data/pricing.js';
       const amount = tierFor(state.pets)[state.delivery];
       priceEl.textContent = `$${amount}`;
       summaryEl.textContent = `${state.pets} ${petWord(state.pets)} · ${delivery[state.delivery].label} · ${canvasShort(state.pets)} canvas`;
+
+      // Hand the answers to the commission form so they aren't asked twice.
+      if (ctaEl) {
+        const params = new URLSearchParams({
+          pets: String(state.pets),
+          delivery: state.delivery,
+        });
+        ctaEl.href = `/commission?${params}`;
+      }
+
       reveal(resultEl);
     };
 

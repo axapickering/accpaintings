@@ -116,12 +116,22 @@ images.forEach((img, i) => columns[i % DEFAULT_COLS].push({ img, order: i }));
     class="lightbox-nav lightbox-prev"
     data-lb-prev
     type="button"
-    aria-label="Previous painting">&#8249;</button>
+    aria-label="Previous painting"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M15 5.5 L9 12 L15 18.5" />
+    </svg>
+  </button>
   <button
     class="lightbox-nav lightbox-next"
     data-lb-next
     type="button"
-    aria-label="Next painting">&#8250;</button>
+    aria-label="Next painting"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M9 5.5 L15 12 L9 18.5" />
+    </svg>
+  </button>
   <div class="lightbox-inner">
     <figure class="lightbox-figure">
       <img data-lb-img src="" alt="" />
@@ -367,13 +377,25 @@ images.forEach((img, i) => columns[i % DEFAULT_COLS].push({ img, order: i }));
     border-radius: 50%;
     background: rgba(255, 253, 250, 0.12);
     color: var(--cream);
-    font-size: 2.1rem;
-    line-height: 1;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: background 0.15s ease;
+  }
+
+  /* Chevron centred in its 24×24 viewBox, so flex centring is exact — the
+     ‹ › characters sat off-centre because buttons don't inherit font-family
+     and flex centres the glyph's advance box, not its visible ink. */
+  .lightbox-nav svg {
+    display: block;
+    width: 42%;
+    height: 42%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .lightbox-nav:hover {
@@ -396,7 +418,6 @@ images.forEach((img, i) => columns[i % DEFAULT_COLS].push({ img, order: i }));
     .lightbox-nav {
       width: 40px;
       height: 40px;
-      font-size: 1.7rem;
     }
     .lightbox-prev {
       left: 0.4rem;

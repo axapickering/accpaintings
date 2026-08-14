@@ -189,6 +189,13 @@ const canvasChoices = tierFor(1).canvas;
     display: none;
   }
 
+  /* The header is sticky at ~72px, so anything scrolled to needs to clear it
+     rather than sliding underneath. */
+  .cf-step,
+  .cf-details {
+    scroll-margin-top: 88px;
+  }
+
   .cf-step.reveal,
   .cf-details.reveal,
   .cf-success.reveal {
@@ -609,6 +616,45 @@ const canvasChoices = tierFor(1).canvas;
     root.querySelectorAll('[data-change]').forEach((btn) => {
       btn.addEventListener('click', () => editStep(btn.getAttribute('data-change')));
     });
+
+    // Carry over answers from the home-page price finder (?pets=&delivery=),
+    // so nobody answers the same questions twice. Clicking the matching
+    // buttons replays the normal flow, so the chips, Change links, revealed
+    // steps and price all end up exactly as if the visitor had tapped them.
+    //
+    // Matching by attribute value rather than building a selector string —
+    // canvas sizes contain '×' and the values come from the URL.
+    const clickOption = (attr, value) => {
+      if (!value) return false;
+      const btn = Array.from(root.querySelectorAll(`[${attr}]`)).find(
+        (b) => b.getAttribute(attr) === value
+      );
+      if (!btn) return false;
+      btn.click();
+      return true;
+    };
+
+    const incoming = new URLSearchParams(location.search);
+    if (clickOption('data-pets', incoming.get('pets'))) {
+      // Only meaningful for a single pet, and ignored otherwise.
+      clickOption('data-canvas', incoming.get('canvas'));
+      clickOption('data-delivery', incoming.get('delivery'));
+
+      // Scroll past the questions that are already answered, to whatever still
+      // needs the visitor: the contact fields normally, or the canvas step if
+      // that's still open (a single pet — the home-page calculator doesn't ask
+      // about canvas, since both sizes cost the same).
+      const target = details.hidden ? stepEl('canvas') : details;
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      // Wait a frame so the revealed steps have been laid out; scrolling
+      // before that lands at the wrong offset.
+      requestAnimationFrame(() =>
+        target.scrollIntoView({
+          behavior: reduced ? 'auto' : 'smooth',
+          block: 'start',
+        })
+      );
+    }
 
     const accessKey = root.dataset.accessKey || '';
     const statusEl = root.querySelector('[data-status]');
