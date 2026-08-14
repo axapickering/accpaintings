@@ -86,6 +86,33 @@ const INTERVAL = 8000;
         </div>
       ))
     }
+
+    {
+      slides.length > 1 && (
+        <Fragment>
+          <button
+            class="cnav cnav-prev"
+            data-cprev
+            type="button"
+            aria-label="Previous pair"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M15 5.5 L9 12 L15 18.5" />
+            </svg>
+          </button>
+          <button
+            class="cnav cnav-next"
+            data-cnext
+            type="button"
+            aria-label="Next pair"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M9 5.5 L15 12 L9 18.5" />
+            </svg>
+          </button>
+        </Fragment>
+      )
+    }
   </div>
 
   {
@@ -186,6 +213,63 @@ const INTERVAL = 8000;
     flex: none;
   }
 
+  /* Sits over the stage, which is position: relative. Distinct from .arrow,
+     the "photo → painting" glyph between the two frames. */
+  .cnav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--white);
+    color: var(--ink-soft);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: color 0.15s ease, border-color 0.15s ease,
+      background 0.15s ease;
+  }
+
+  /* The chevron is geometrically centred in its 24×24 viewBox (x and y both
+     span 9→15 / 5.5→18.5 around 12), so flex centring lands it exactly. */
+  .cnav svg {
+    display: block;
+    width: 42%;
+    height: 42%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .cnav:hover {
+    color: var(--accent-deep);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .cnav-prev {
+    left: 0;
+  }
+
+  .cnav-next {
+    right: 0;
+  }
+
+  @media (max-width: 700px) {
+    .cnav {
+      width: 36px;
+      height: 36px;
+    }
+  }
+
   .carousel-dots {
     display: flex;
     justify-content: center;
@@ -283,6 +367,17 @@ const INTERVAL = 8000;
         start();
       })
     );
+
+    // Arrows step through the same wrapping sequence as auto-rotation, and
+    // restart the timer so it doesn't advance again a moment after a click.
+    root.querySelector('[data-cprev]')?.addEventListener('click', () => {
+      show(current - 1);
+      start();
+    });
+    root.querySelector('[data-cnext]')?.addEventListener('click', () => {
+      show(current + 1);
+      start();
+    });
 
     root.addEventListener('mouseenter', stop);
     root.addEventListener('mouseleave', start);
